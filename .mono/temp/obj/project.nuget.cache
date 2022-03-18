@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "2BBfh0D9xinJY/QlxAHU8RCXgp8eoe6tAU24HVau1g0NMq2pQ8uFFEDh8PQIzEeCxhLwkGjhfp7DgDoJ0yf7vw==",
+  "success": true,
+  "projectFilePath": "C:\\Giochi\\Godot\\Roguelite2\\Roguelite 2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Alessandro\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.2\\microsoft.netframework.referenceassemblies.1.0.2.nupkg.sha512",
+    "C:\\Users\\Alessandro\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net472\\1.0.2\\microsoft.netframework.referenceassemblies.net472.1.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}
