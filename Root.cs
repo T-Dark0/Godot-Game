@@ -3,14 +3,23 @@ using Godot;
 
 public class Root : Node2D
 {
-    private TileMap tilemap;
-    private Map map;
+    private TileMap _tilemap;
+    private Player _player;
+    private Map _map;
 
     public override void _Ready()
     {
-        this.tilemap = (TileMap)GetNode("TileMap");
-        this.map = WorldGenerator.Generate(Guid.NewGuid().GetHashCode(), Globals.MapSize, Globals.MapEdgeBoundary);
+        this._tilemap = (TileMap)GetNode("TileMap");
+        this._player = (Player)GetNode("Player");
+        this._map = WorldGenerator.Generate(Guid.NewGuid().GetHashCode(), Globals.MapSize, Globals.MapEdgeBoundary);
+        AddChild(this._map);
+
         mapToTilemap();
+    }
+
+    public override void _Process(float delta)
+    {
+        OS.SetWindowTitle($"{_player.Coords}");
     }
 
     private void mapToTilemap()
@@ -19,8 +28,8 @@ public class Root : Node2D
         {
             for (int y = 0; y < Globals.MapSize; y++)
             {
-                var tile = map[x, y];
-                tilemap.SetCell(x, y, (int)tile);
+                var tile = _map[x, y];
+                _tilemap.SetCell(x, y, (int)tile);
             }
         }
     }

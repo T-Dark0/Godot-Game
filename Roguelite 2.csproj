@@ -1,5 +1,6 @@
 <Project Sdk="Godot.NET.Sdk/3.3.0">
   <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>Roguelite2</RootNamespace>
   </PropertyGroup>

@@ -1,3 +1,5 @@
+using Godot;
+
 public readonly struct Vector2i
 {
     public readonly int x;
@@ -6,7 +8,7 @@ public readonly struct Vector2i
     public static Vector2i Up = new Vector2i(0, -1);
     public static Vector2i Down = new Vector2i(0, 1);
     public static Vector2i Left = new Vector2i(-1, 0);
-    public static Vector2i Right = new Vector2i(1, 1);
+    public static Vector2i Right = new Vector2i(1, 0);
 
     public Vector2i(int x, int y)
     {
@@ -22,6 +24,8 @@ public readonly struct Vector2i
 
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);
 
+    public static explicit operator Vector2(Vector2i vec) => new Vector2(vec.x, vec.y);
+
     public static Vector2i operator +(Vector2i lhs, Vector2i rhs)
     {
         return new Vector2i(lhs.x + rhs.x, lhs.y + rhs.y);
@@ -30,6 +34,11 @@ public readonly struct Vector2i
     public static Vector2i operator -(Vector2i lhs, Vector2i rhs)
     {
         return new Vector2i(lhs.x - rhs.x, lhs.y - rhs.y);
+    }
+
+    public static Vector2i operator *(Vector2i lhs, int rhs)
+    {
+        return new Vector2i(lhs.x * rhs, lhs.y * rhs);
     }
 
     public static bool operator ==(Vector2i lhs, Vector2i rhs)

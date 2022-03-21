@@ -5,7 +5,20 @@ public class Player : Area2D
     private const float ZoomStep = 1.2f;
 
     private Camera2D _camera;
-    private ObjectToMove _objectToMove = ObjectToMove.Player;
+    private Vector2i _coords;
+    public Vector2i Coords
+    {
+        get
+        {
+            return _coords;
+        }
+        private set
+        {
+            //FIXME: This should be a "move" method: we need to maintain the half-tile offset
+            _coords = value;
+            Position = (Vector2)value * Globals.TileSize;
+        }
+    }
 
     public override void _Ready()
     {
@@ -19,56 +32,27 @@ public class Player : Area2D
     public override void _UnhandledInput(InputEvent @event)
     {
         HandleZoom(@event);
-        HandleToggleControls(@event);
         HandleMovement(@event);
-    }
-
-    private void HandleToggleControls(InputEvent @event)
-    {
-        if (@event.IsActionPressed("toggle_player_camera_controls"))
-        {
-            switch (_objectToMove)
-            {
-                case ObjectToMove.Player:
-                    _objectToMove = ObjectToMove.Camera;
-                    break;
-                case ObjectToMove.Camera:
-                    _objectToMove = ObjectToMove.Player;
-                    _camera.Position = Vector2.Zero;
-                    break;
-            }
-        }
     }
 
     private void HandleMovement(InputEvent @event)
     {
-        Node2D obj = null;
-        switch (_objectToMove)
-        {
-            case ObjectToMove.Player:
-                obj = this;
-                break;
-            case ObjectToMove.Camera:
-                obj = _camera;
-                break;
-        }
         if (@event.IsActionPressed("move_right"))
         {
-            obj.Position += Vector2.Right * Globals.TileSize;
+            Coords += Vector2i.Right;
         }
         if (@event.IsActionPressed("move_left"))
         {
-            obj.Position += Vector2.Left * Globals.TileSize;
+            Coords += Vector2i.Left;
         }
         if (@event.IsActionPressed("move_up"))
         {
-            obj.Position += Vector2.Up * Globals.TileSize;
+            Coords += Vector2i.Up;
         }
         if (@event.IsActionPressed("move_down"))
         {
-            obj.Position += Vector2.Down * Globals.TileSize;
+            Coords += Vector2i.Down;
         }
-
     }
 
     private void HandleZoom(InputEvent @event)
@@ -81,11 +65,5 @@ public class Player : Area2D
         {
             _camera.Zoom *= ZoomStep;
         }
-    }
-
-    private enum ObjectToMove
-    {
-        Camera,
-        Player,
     }
 }
