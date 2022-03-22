@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class Map : Node2D
+public class Map : TileMap
 {
-    private List<Tile> map;
     public List<Room> Rooms; //HACK: Remove
+    public List<Path> Paths;
     public int width { get; private set; }
     public int height { get; private set; }
 
@@ -15,6 +15,7 @@ public class Map : Node2D
     private Map()
     {
         Rooms = new List<Room>();
+        Paths = new List<Path>();
     }
 
     public static Map Filled(int width, int height, Tile tile)
@@ -22,7 +23,6 @@ public class Map : Node2D
         var self = new Map();
         self.width = width;
         self.height = height;
-        self.map = Enumerable.Repeat(tile, width * height).ToList();
         return self;
     }
 
@@ -87,17 +87,11 @@ public class Map : Node2D
     {
         get
         {
-            if (IsInBounds(x, y)) return map[x + y * width];
-            else throw new IndexOutOfRangeException($"point ({x}, {y}) is out of bounds for map of size({width}, {height})");
+            return (Tile)GetCell(x, y);
         }
         set
         {
-            if (IsInBounds(x, y))
-            {
-                map[x + y * width] = value;
-                return;
-            }
-            else throw new IndexOutOfRangeException($"point ({x}, {y}) is out of bounds for map of size({width}, {height})");
+            SetCell(x, y, (int)value);
         }
     }
     public Tile this[Vector2i coords]
@@ -108,6 +102,16 @@ public class Map : Node2D
 
     public override void _Draw()
     {
+        foreach (var path in Paths)
+        {
+            for (int i = 0; i < path.Points.Count - 1; i++)
+            {
+                var from = (Vector2)path.Points[i] * Globals.TileSize;
+                var to = (Vector2)path.Points[i + 1] * Globals.TileSize;
+                DrawLine(from, to, new Color("FF00FF00"));
+            }
+        }
+
         foreach (var room in Rooms)
         {
             var origin = room.BoundingBox.Origin * 16;

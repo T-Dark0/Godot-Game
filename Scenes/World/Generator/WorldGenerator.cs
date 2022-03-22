@@ -8,9 +8,8 @@ public class WorldGenerator : Reference
     private const int CandidateCount = 100;
     private const float Threshold = 0.45f;
 
-    public static Map Generate(int seed, int size, int edgeBoundary)
+    public static void Generate(int seed, int size, int edgeBoundary, Map map)
     {
-        var map = Map.Filled(size, size, Tile.Empty);
         var rng = new System.Random(seed);
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = seed;
@@ -22,13 +21,17 @@ public class WorldGenerator : Reference
         {
             var room = roomFactory.Create(location);
             room.ApplyToMap(map);
-            map[room.BoundingBox.GetCentre(Rect2i.CentreSkew.BottomRight)] = Tile.DebugGreen;
+            var centre = room.BoundingBox.GetCentre(Rect2i.CentreSkew.BottomRight);
+            map[centre] = Tile.DebugGreen;
+        }
+        for (int i = 0; i < 2; i++)
+        {
+            new Path.MidpointOffsetFactory(rng).Create(locations[i], locations[i + 1]).ApplyToMap(map);
         }
         foreach (var location in locations)
         {
             map[location] = Tile.DebugRed;
         }
-        return map;
     }
 
     private static List<Vector2i> RoomLocations(Random rng, int mapSize, int mapEdgeBoundary)

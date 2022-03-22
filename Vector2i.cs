@@ -25,6 +25,7 @@ public readonly struct Vector2i
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);
 
     public static explicit operator Vector2(Vector2i vec) => new Vector2(vec.x, vec.y);
+    public static explicit operator Vector2i(Vector2 vec) => new Vector2i((int)vec.x, (int)vec.y);
 
     public static Vector2i operator +(Vector2i lhs, Vector2i rhs)
     {

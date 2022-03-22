@@ -10,8 +10,8 @@ public readonly struct Rect2i
     private Rect2i(int left, int right, int top, int bottom)
     {
         Debug.Assert(
-            right < left || bottom < top,
-            $"rectangle (left: {left}, right: {right}, top: {top}, bottom: {bottom} would have negative size"
+            right >= left && bottom >= top,
+            $"rectangle (left: {left}, right: {right}, top: {top}, bottom: {bottom}) would have negative size"
         );
         Origin = (left, top);
         Size = (right - left + 1, bottom - top + 1);
@@ -19,7 +19,7 @@ public readonly struct Rect2i
     private Rect2i(Vector2i origin, Vector2i size)
     {
         Debug.Assert(
-            size.x < 0 || size.y < 0,
+            size.x > 0 && size.y > 0,
             $"A Rect2i can't have negative size, and {size} is negative"
         );
         Origin = origin;
