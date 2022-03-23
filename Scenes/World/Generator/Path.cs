@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 public class Path
@@ -12,70 +11,53 @@ public class Path
         Points = points;
     }
 
-    /*
-    public Path(Vector2i start, Vector2i end, int minSegmentLength, int maxSegmentLength, Random rng)
-    {
-        Points = new List<Vector2i>();
-        Points.Add(start);
-        var cumulatedLength = 0;
-        var angle = (float)(rng.NextDouble() * Math.PI * 2); // [0, 2pi)
-        while (cumulatedLength < totalLength)
-        {
-            var length = rng.Next(minSegmentLength, maxSegmentLength);
-            cumulatedLength += length;
-
-            var new_angle = (float)(rng.NextDouble() * Math.PI - (Math.PI / 2)); // [-pi/2, pi/2)
-            angle += new_angle;
-            var x = (int)(Math.Cos(angle) * length);
-            var y = (int)(Math.Sin(angle) * length);
-
-            var point = Points.Last();
-            Points.Add(point + (x, y));
-        }
-    }
-    */
-
     public void ApplyToMap(Map map)
     {
         map.Paths.Add(this);
     }
 
-    public class MidpointOffsetFactory
+    public class RecursiveBisectFactory
     {
-        private List<Vector2i> _points;
         private Random _rng;
 
-        public MidpointOffsetFactory(Random rng)
+        public int MaxDepth = 6;
+        public float OffsetLengthScale = 1.0f / 3.0f;
+
+        public RecursiveBisectFactory(int seed)
         {
-            _points = new List<Vector2i>();
-            _rng = rng;
+            _rng = new Random(seed);
         }
 
         public Path Create(Vector2i from, Vector2i to)
         {
-            CreatePoints((Vector2)from, (Vector2)to, 0);
-            return new Path(_points);
+            var points = new List<Vector2i>();
+            points.Add(from);
+            CreatePoints(points, (Vector2)from, (Vector2)to, 0);
+            points.Add(to);
+            return new Path(points);
         }
 
-        private void CreatePoints(Vector2 from, Vector2 to, int depth)
+        private void CreatePoints(List<Vector2i> points, Vector2 from, Vector2 to, int depth)
         {
-            if (depth > 5) return;
-            var midpoint = newMidpoint(from, to);
-            CreatePoints(from, midpoint, depth + 1);
-            CreatePoints(midpoint, to, depth + 1);
-            _points.Add((Vector2i)midpoint);
+            if (depth > MaxDepth) return;
+            var point = newPoint(from, to);
+            CreatePoints(points, from, point, depth + 1);
+            points.Add((Vector2i)point);
+            CreatePoints(points, point, to, depth + 1);
         }
 
-        private Vector2 newMidpoint(Vector2 from, Vector2 to)
+        private Vector2 newPoint(Vector2 from, Vector2 to)
         {
             var dx = to.x - from.x;
             var dy = to.y - from.y;
-            var fromToLength = Math.Sqrt(dx * dy + dy * dy);
+            var fromToLength = Math.Sqrt(dx * dx + dy * dy);
 
-            var midpoint = new Vector2(dx / 2, dy / 2);
-            var newVecLength = (float)(_rng.NextDouble() * fromToLength / 3);
-            var newVecDirection = new Vector2(dy, -dx).Normalized();
-            return midpoint + newVecDirection * newVecLength;
+            var offsetLength = (float)((_rng.NextDouble() - 0.5) * 2 * fromToLength * OffsetLengthScale);
+            var offsetDirection = new Vector2(dy, -dx).Normalized();
+            var offset = offsetDirection * offsetLength;
+            var midpoint = new Vector2((to.x + from.x) / 2, (to.y + from.y) / 2);
+            var newPoint = midpoint + offset;
+            return newPoint;
         }
     }
 }

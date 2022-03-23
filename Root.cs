@@ -10,7 +10,9 @@ public class Root : Node2D
     {
         _map = GetNode<Map>("Map");
         _player = GetNode<Player>("Player");
-        WorldGenerator.Generate(Guid.NewGuid().GetHashCode(), Globals.MapSize, Globals.MapEdgeBoundary, _map);
+        //var seed = 6;
+        var seed = Guid.NewGuid().GetHashCode();
+        WorldGenerator.Generate(seed, Globals.MapSize, Globals.MapEdgeBoundary, _map);
     }
 
     public override void _Process(float delta)

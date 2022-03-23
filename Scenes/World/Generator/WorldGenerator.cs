@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class WorldGenerator : Reference
+public class WorldGenerator
 {
     private const int CandidateCount = 100;
     private const float Threshold = 0.45f;
 
     public static void Generate(int seed, int size, int edgeBoundary, Map map)
     {
-        var rng = new System.Random(seed);
+        var rng = new Random(seed);
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = seed;
 
         var locations = RoomLocations(rng, size, edgeBoundary);
+        new Path.RecursiveBisectFactory(seed).Create((128, 80), (160, 74)).ApplyToMap(map);
 
         var roomFactory = new Room.Factory(seed);
         foreach (var location in locations)
@@ -23,10 +24,6 @@ public class WorldGenerator : Reference
             room.ApplyToMap(map);
             var centre = room.BoundingBox.GetCentre(Rect2i.CentreSkew.BottomRight);
             map[centre] = Tile.DebugGreen;
-        }
-        for (int i = 0; i < 2; i++)
-        {
-            new Path.MidpointOffsetFactory(rng).Create(locations[i], locations[i + 1]).ApplyToMap(map);
         }
         foreach (var location in locations)
         {
@@ -38,7 +35,6 @@ public class WorldGenerator : Reference
     {
         var locations = new List<Vector2i>();
         var roomCount = rng.Next(5, 8);
-        //var roomCount = 1;
         for (int i = 0; i < roomCount; i++)
         {
             AddRoomLocation(locations, rng, mapSize, mapEdgeBoundary);

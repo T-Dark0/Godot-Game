@@ -5,7 +5,7 @@ using Godot;
 
 public class Map : TileMap
 {
-    public List<Room> Rooms; //HACK: Remove
+    public List<Room> Rooms;
     public List<Path> Paths;
     public int width { get; private set; }
     public int height { get; private set; }
