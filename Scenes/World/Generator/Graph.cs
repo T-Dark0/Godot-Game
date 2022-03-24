@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ public class Graph<N, E>
         return new NodeId(_nodes.Count - 1);
     }
 
-    public EdgeId AddEdge(E data, NodeId from, NodeId to)
+    public EdgeId AddEdge(NodeId from, NodeId to, E data)
     {
         //See the comment on Edge for an explanation of the concept at the basis of this
         var fromNode = GetNode(from);
@@ -46,28 +47,60 @@ public class Graph<N, E>
         return edgeId;
     }
 
-    public IEnumerable<(NodeId id, N data)> Neighbors(NodeId of)
+    public bool ContainsEdge(NodeId from, NodeId to)
     {
-        var ofNode = GetNode(of);
-        //First the outgoing nodes
-        var currentEdgeIdOpt = ofNode.OutNext;
+        var fromNode = GetNode(from);
+        return
+            EdgesOfOutgoing(from).Any(pair => GetEdge(pair.id).OutNode == to)
+            || EdgesOfIngoing(from).Any(pair => GetEdge(pair.id).InNode == to);
+    }
+
+    public IEnumerable<(EdgeId id, E data)> EdgesOfOutgoing(NodeId node)
+    {
+        var nodeNode = GetNode(node);
+        var currentEdgeIdOpt = nodeNode.OutNext;
         while (currentEdgeIdOpt is EdgeId currentEdgeId)
         {
             var currentEdge = GetEdge(currentEdgeId);
+            yield return (currentEdgeId, currentEdge.Data);
             currentEdgeIdOpt = currentEdge.OutNext;
-            var currentNodeId = currentEdge.OutNode;
-            yield return (currentNodeId, GetNode(currentNodeId).Data);
         }
-        //Then the ingoing ones
-        currentEdgeIdOpt = ofNode.InNext;
+    }
+
+    public IEnumerable<(EdgeId id, E data)> EdgesOfIngoing(NodeId node)
+    {
+        var nodeNode = GetNode(node);
+        var currentEdgeIdOpt = nodeNode.InNext;
         while (currentEdgeIdOpt is EdgeId currentEdgeId)
         {
             var currentEdge = GetEdge(currentEdgeId);
-            var currentNodeId = currentEdge.OutNode;
-            currentEdgeIdOpt = currentEdge.OutNext;
-            if (currentNodeId == of) continue; //don't report self loops twice
-            yield return (currentNodeId, GetNode(currentNodeId).Data);
+            yield return (currentEdgeId, currentEdge.Data);
+            currentEdgeIdOpt = currentEdge.InNext;
         }
+    }
+
+    public IEnumerable<(EdgeId id, E data)> EdgesOf(NodeId node)
+    {
+        return EdgesOfOutgoing(node).Concat(EdgesOfIngoing(node));
+    }
+
+    public IEnumerable<(NodeId id, N data)> Neighbors(NodeId node)
+    {
+        var outgoing = EdgesOfOutgoing(node)
+            .Select(pair =>
+            {
+                var edge = GetEdge(pair.id);
+                var nodeId = edge.OutNode;
+                return (nodeId, GetNode(nodeId).Data);
+            });
+        var ingoing = EdgesOfIngoing(node)
+            .Select(pair =>
+            {
+                var edge = GetEdge(pair.id);
+                var nodeId = edge.InNode;
+                return (nodeId, GetNode(nodeId).Data);
+            });
+        return outgoing.Concat(ingoing);
     }
 
     public IEnumerable<(NodeId id, N data)> Nodes()
@@ -157,56 +190,32 @@ public class Graph<N, E>
     }
 }
 
-public struct NodeId
+public struct NodeId : IComparable<NodeId>
 {
     public int Id;
 
-    public NodeId(int id)
-    {
-        Id = id;
-    }
+    public NodeId(int id) => Id = id;
 
-    public static bool operator ==(NodeId lhs, NodeId rhs)
-    {
-        return lhs.Id == rhs.Id;
-    }
-    public static bool operator !=(NodeId lhs, NodeId rhs)
-    {
-        return lhs.Id != rhs.Id;
-    }
-    public override bool Equals(object obj)
-    {
-        return obj is NodeId rhs && Id == rhs.Id;
-    }
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
+    public static bool operator ==(NodeId lhs, NodeId rhs) => lhs.Id == rhs.Id;
+    public static bool operator !=(NodeId lhs, NodeId rhs) => lhs.Id != rhs.Id;
+    public static bool operator <(NodeId lhs, NodeId rhs) => lhs.Id < rhs.Id;
+    public static bool operator >(NodeId lhs, NodeId rhs) => lhs.Id > rhs.Id;
+    public override bool Equals(object obj) => obj is NodeId rhs && Id == rhs.Id;
+    public override int GetHashCode() => Id.GetHashCode();
+    public int CompareTo(NodeId other) => this.Id.CompareTo(other.Id);
 }
 
-public struct EdgeId
+public struct EdgeId : IComparable<EdgeId>
 {
     public int Id;
 
-    public EdgeId(int id)
-    {
-        Id = id;
-    }
+    public EdgeId(int id) => Id = id;
 
-    public static bool operator ==(EdgeId lhs, EdgeId rhs)
-    {
-        return lhs.Id == rhs.Id;
-    }
-    public static bool operator !=(EdgeId lhs, EdgeId rhs)
-    {
-        return lhs.Id != rhs.Id;
-    }
-    public override bool Equals(object obj)
-    {
-        return obj is NodeId rhs && Id == rhs.Id;
-    }
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
+    public static bool operator ==(EdgeId lhs, EdgeId rhs) => lhs.Id == rhs.Id;
+    public static bool operator !=(EdgeId lhs, EdgeId rhs) => lhs.Id != rhs.Id;
+    public static bool operator <(EdgeId lhs, EdgeId rhs) => lhs.Id < rhs.Id;
+    public static bool operator >(EdgeId lhs, EdgeId rhs) => lhs.Id > rhs.Id;
+    public override bool Equals(object obj) => obj is NodeId rhs && Id == rhs.Id;
+    public override int GetHashCode() => Id.GetHashCode();
+    public int CompareTo(EdgeId other) => this.Id.CompareTo(other.Id);
 }

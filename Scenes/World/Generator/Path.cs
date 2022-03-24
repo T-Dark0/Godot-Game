@@ -11,11 +11,6 @@ public class Path
         Points = points;
     }
 
-    public void ApplyToMap(Map map)
-    {
-        map.Paths.Add(this);
-    }
-
     public class RecursiveBisectFactory
     {
         private Random _rng;

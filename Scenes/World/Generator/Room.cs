@@ -7,21 +7,18 @@ public class Room
 {
     public ReadOnlyDictionary<Vector2i, Tile> Tiles { get; private set; }
     public Rect2i BoundingBox { get; private set; }
+    private char _name;
 
-    private Room(ReadOnlyDictionary<Vector2i, Tile> tiles, Rect2i boundingBox)
+    private Room(ReadOnlyDictionary<Vector2i, Tile> tiles, Rect2i boundingBox, char name)
     {
         Tiles = tiles;
         BoundingBox = boundingBox;
+        _name = name;
     }
 
-    //FIXME: Don't let walls replace floors
-    public void ApplyToMap(Map map)
+    public override string ToString()
     {
-        map.Rooms.Add(this);
-        foreach (var tile in Tiles)
-        {
-            map[tile.Key] = tile.Value;
-        }
+        return _name.ToString();
     }
 
     public class Factory
@@ -29,6 +26,7 @@ public class Room
         private IEnumerator<float> _roomFinder;
         private OpenSimplexNoise _noise;
         private float _threshold;
+        private char _name;
 
         public Factory(Random rng)
         {
@@ -37,6 +35,7 @@ public class Room
             _noise = noise;
             _threshold = 0.45f;
             _roomFinder = RoomFinder();
+            _name = 'a';
         }
 
         public Room Create(Vector2i origin)
@@ -85,7 +84,8 @@ public class Room
 
             return new Room(
                 new ReadOnlyDictionary<Vector2i, Tile>(tiles),
-                Rect2i.FromSides(left, right, top, bottom)
+                Rect2i.FromSides(left, right, top, bottom),
+                _name++
             );
         }
 

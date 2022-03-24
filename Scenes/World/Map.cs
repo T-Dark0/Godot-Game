@@ -3,15 +3,13 @@ using Godot;
 
 public class Map : TileMap
 {
-    public List<Room> Rooms;
-    public List<Path> Paths;
+    public Graph<Room, Path> Graph;
     public int width { get; private set; }
     public int height { get; private set; }
 
     private Map()
     {
-        Rooms = new List<Room>();
-        Paths = new List<Path>();
+        Graph = new Graph<Room, Path>();
     }
 
     public static Map Filled(int width, int height, Tile tile)
@@ -50,21 +48,24 @@ public class Map : TileMap
 
     public override void _Draw()
     {
-        foreach (var path in Paths)
+        foreach (var (_, room) in Graph.Nodes())
+        {
+            var origin = room.BoundingBox.Origin * 16;
+            var size = room.BoundingBox.Size * 16;
+
+            var font = new Control().GetFont("font");
+            DrawString(font, (Vector2)origin, room.ToString());
+            DrawRect(new Rect2((Vector2)origin, (Vector2)size), new Color("0FFFFF00"));
+        }
+        var color = unchecked((int)0x00FF00FF);
+        foreach (var (_, path) in Graph.Edges())
         {
             for (int i = 0; i < path.Points.Count - 1; i++)
             {
                 var from = (Vector2)path.Points[i] * Globals.TileSize;
                 var to = (Vector2)path.Points[i + 1] * Globals.TileSize;
-                DrawLine(from, to, new Color("FF00FF00"));
+                DrawLine(from, to, new Color(color));
             }
-        }
-
-        foreach (var room in Rooms)
-        {
-            var origin = room.BoundingBox.Origin * 16;
-            var size = room.BoundingBox.Size * 16;
-            DrawRect(new Rect2((Vector2)origin, (Vector2)size), new Color("0FFFFF00"));
         }
     }
 }

@@ -10,83 +10,60 @@ public class WorldGenerator
 
     public static void Generate(int seed, int size, int edgeBoundary, Map map)
     {
-        Test();
-
         var rng = new Random(seed);
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = seed;
 
-        var locations = RoomLocations(rng, size, edgeBoundary);
-        var roomFactory = new Room.Factory(rng);
-        foreach (var location in locations)
-        {
-            var room = roomFactory.Create(location);
-            room.ApplyToMap(map);
-            var centre = room.BoundingBox.GetCentre(CentreSkew.BottomRight);
-            map[centre] = Tile.DebugGreen;
-        }
-        foreach (var location in locations)
-        {
-            map[location] = Tile.DebugRed;
-        }
+        CreateRoomGraph(rng, size, edgeBoundary, map);
     }
 
-    private static void Test()
+    private static void CreateRoomGraph(Random rng, int size, int edgeBoundary, Map map)
     {
-        var graph = new Graph<char, int>();
-        var a = graph.AddNode('a');
-        var b = graph.AddNode('b');
-        var c = graph.AddNode('c');
-        var d = graph.AddNode('d');
-        graph.AddEdge(1, a, b);
-        graph.AddEdge(2, a, c);
-        graph.AddEdge(3, c, d);
-        graph.AddEdge(4, a, d);
-        graph.AddEdge(5, b, b);
-        graph.AddEdge(6, d, a);
+        var graph = map.Graph;
 
-        GD.Print(graph);
-
-        foreach (var (id, data) in graph.Neighbors(a))
-        {
-            GD.Print(data);
-        }
-    }
-
-    /*
-    private static RoomGraph CreateRoomGraph(Random rng, int size, int edgeBoundary)
-    {
-        var roomGraph = new RoomGraph();
-
+        //Generate all the rooms
         var roomFactory = new Room.Factory(rng);
         foreach (var location in RoomLocations(rng, size, edgeBoundary))
         {
-            roomGraph.AddNode(roomFactory.Create(location));
+            graph.AddNode(roomFactory.Create(location));
         }
 
-        Func<((NodeId id, Room room), (NodeId id, Room room)), float> distance = pair =>
-       {
-           var ((_, from), (_, to)) = pair;
-           var fromCentre = from.BoundingBox.GetCentre(CentreSkew.BottomRight);
-           var toCentre = to.BoundingBox.GetCentre(CentreSkew.BottomRight);
-           return fromCentre.Distance(toCentre);
-       };
-        var closestRoomDistance = roomGraph.Nodes()
-            .Combinations2()
-            .Select(distance)
-            .Min();
-        var distanceThreshold = (int)(closestRoomDistance + rng.NextDouble() * 0.2 + 0.2);
-        var roomsInRange = roomGraph.Nodes()
-            .Combinations2()
-            .Where(pair => distance(pair) < distanceThreshold);
-        foreach (var ((from, _), (to, _)) in roomsInRange)
+        var connectedRooms = graph.Nodes()
+            .SelectMany(fromPair =>
+            {
+                var closestRoomDistance = graph.Nodes()
+                    .Where(toPair => toPair.id != fromPair.id)
+                    .Select(toPair => RoomDistance(fromPair.data, toPair.data))
+                    .Min();
+                var distanceThreshold = (int)(closestRoomDistance * (rng.NextDouble() * 0.2 + 1.2));
+                var roomsInRange = graph.Nodes()
+                    .Where(
+                        toPair => toPair.id != fromPair.id
+                        && RoomDistance(fromPair.data, toPair.data) < distanceThreshold
+                    );
+                return RepeatForever(fromPair).Zip(roomsInRange, (from, to) => (from, to));
+            });
+        var pathFactory = new Path.RecursiveBisectFactory(rng.Next());
+        foreach (var ((fromId, fromRoom), (toId, toRoom)) in connectedRooms)
         {
-            roomGraph.AddEdge(from, to);
+            var fromCentre = fromRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
+            var toCentre = toRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
+            //The graph is supposed to be undirected, so don't insert the same node twice in opposite directions
+            var from = fromId;
+            var to = toId;
+            if (from < to)
+            {
+                var temp = from;
+                from = to;
+                to = from;
+            }
+            if (!graph.ContainsEdge(from, to))
+            {
+                graph.AddEdge(from, to, pathFactory.Create(fromCentre, toCentre));
+            }
         }
-
-        return roomGraph
+        GD.Print(graph);
     }
-    */
 
     private static List<Vector2i> RoomLocations(Random rng, int mapSize, int mapEdgeBoundary)
     {
@@ -125,6 +102,18 @@ public class WorldGenerator
         }
         locations.Add(bestCandidate!.Value);
     }
+
+    private static IEnumerable<T> RepeatForever<T>(T elem)
+    {
+        while (true) yield return elem;
+    }
+
+    private static float RoomDistance(Room from, Room to)
+    {
+        var fromCentre = from.BoundingBox.GetCentre(CentreSkew.BottomRight);
+        var toCentre = to.BoundingBox.GetCentre(CentreSkew.BottomRight);
+        return fromCentre.Distance(toCentre);
+    }
 }
 
 static class LinqExtension
@@ -141,4 +130,5 @@ static class LinqExtension
             counter++;
         }
     }
+
 }
