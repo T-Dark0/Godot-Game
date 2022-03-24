@@ -1,2 +1,2 @@
-﻿49399
+﻿49388
 C:/Giochi/Godot/Godot_v3.4.3-stable_mono_win64.exe

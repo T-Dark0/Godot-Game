@@ -62,12 +62,11 @@ public readonly struct Rect2i
     {
         return $"Rect2i {{ Origin: {Origin}, Size: {Size} }}";
     }
-
-    public enum CentreSkew
-    {
-        TopLeft,
-        TopRight,
-        BottomLeft,
-        BottomRight,
-    }
+}
+public enum CentreSkew
+{
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
 }

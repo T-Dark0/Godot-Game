@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public readonly struct Vector2i
@@ -20,6 +21,12 @@ public readonly struct Vector2i
     {
         x = this.x;
         y = this.y;
+    }
+
+    public float Distance(Vector2i other)
+    {
+        var (dx, dy) = other - this;
+        return (float)Math.Sqrt(dx * dx + dy * dy);
     }
 
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);

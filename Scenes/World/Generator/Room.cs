@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Godot;
 
 public class Room
 {
-    public Dictionary<Vector2i, Tile> Tiles { get; private set; }
+    public ReadOnlyDictionary<Vector2i, Tile> Tiles { get; private set; }
     public Rect2i BoundingBox { get; private set; }
 
-    private Room() { }
+    private Room(ReadOnlyDictionary<Vector2i, Tile> tiles, Rect2i boundingBox)
+    {
+        Tiles = tiles;
+        BoundingBox = boundingBox;
+    }
 
     //FIXME: Don't let walls replace floors
     public void ApplyToMap(Map map)
@@ -25,10 +30,10 @@ public class Room
         private OpenSimplexNoise _noise;
         private float _threshold;
 
-        public Factory(int seed)
+        public Factory(Random rng)
         {
             var noise = new OpenSimplexNoise();
-            noise.Seed = seed;
+            noise.Seed = rng.Next();
             _noise = noise;
             _threshold = 0.45f;
             _roomFinder = RoomFinder();
@@ -78,10 +83,10 @@ public class Room
                 }
             }
 
-            var room = new Room();
-            room.Tiles = tiles;
-            room.BoundingBox = Rect2i.FromSides(left, right, top, bottom);
-            return room;
+            return new Room(
+                new ReadOnlyDictionary<Vector2i, Tile>(tiles),
+                Rect2i.FromSides(left, right, top, bottom)
+            );
         }
 
         private IEnumerator<float> RoomFinder()
