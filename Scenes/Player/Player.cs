@@ -4,7 +4,9 @@ public class Player : Area2D
 {
     private const float ZoomStep = 1.2f;
 
+#nullable disable //loaded in _Ready()
     private Camera2D _camera;
+#nullable enable 
     private Vector2i _coords;
     public Vector2i Coords
     {
@@ -14,18 +16,15 @@ public class Player : Area2D
         }
         private set
         {
-            //FIXME: This should be a "move" method: we need to maintain the half-tile offset
             _coords = value;
-            Position = (Vector2)value * Globals.TileSize;
+            Position = (Vector2)value * Globals.TileSize + new Vector2(0.5f, 0.5f);
         }
     }
 
     public override void _Ready()
     {
         _camera = (Camera2D)GetNode("Camera2D");
-
-        Position = Position.Snapped(Vector2.One * Globals.TileSize);
-        Position += Vector2.One * Globals.TileSize / 2;
+        Coords = new Vector2i(128, 128);
         _camera.MakeCurrent();
     }
 

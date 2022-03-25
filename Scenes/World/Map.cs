@@ -46,6 +46,16 @@ public class Map : TileMap
         set { this[coords.x, coords.y] = value; }
     }
 
+    static int[] colors = {
+        unchecked((int)0xFFFFFFFF), //white
+        unchecked((int)0xFF0000FF), //red
+        unchecked((int)0x00FF00FF), //green
+        unchecked((int)0x0000FFFF), //blue
+        unchecked((int)0x00FFFFFF), //cyan
+        unchecked((int)0xFF00FFFF), //purple
+        unchecked((int)0xFFFF00FF), //yellow
+    };
+
     public override void _Draw()
     {
         foreach (var (_, room) in Graph.Nodes())
@@ -57,15 +67,16 @@ public class Map : TileMap
             DrawString(font, (Vector2)origin, room.ToString());
             DrawRect(new Rect2((Vector2)origin, (Vector2)size), new Color("0FFFFF00"));
         }
-        var color = unchecked((int)0x00FF00FF);
+        var color = 0;
         foreach (var (_, path) in Graph.Edges())
         {
             for (int i = 0; i < path.Points.Count - 1; i++)
             {
                 var from = (Vector2)path.Points[i] * Globals.TileSize;
                 var to = (Vector2)path.Points[i + 1] * Globals.TileSize;
-                DrawLine(from, to, new Color(color));
+                DrawLine(from, to, new Color(colors[color]));
             }
+            color = (color + 1) % colors.Length;
         }
     }
 }

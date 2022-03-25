@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+//TODO: better support for being an undirected graph, since that's how this is used in practice
+//TODO: add support for inserting an edge without creating parallel edges. The world generator could use that feature
 public class Graph<N, E>
 {
     private List<Node> _nodes;
@@ -31,17 +33,17 @@ public class Graph<N, E>
         // to construct an edge, we need two pairs of two things: The index of a node, 
         // as well as the current head of the corresponding linked list, once per list.
 
-        // outEdge is the head of the linked lists of edges outgoing from fromNode
+        // outHead is the head of the linked lists of edges outgoing from fromNode
         // to which we're going to add ourselves, at the start
-        var outEdge = fromNode.OutNext;
+        var outHead = fromNode.OutNext;
         fromNode.OutNext = edgeId;
 
-        // inEdge, on the other hand, is the head of the linked lists of edges ingoing into toNode
-        var inEdge = toNode.InNext;
+        // inHead, on the other hand, is the head of the linked lists of edges ingoing into toNode
+        var inHead = toNode.InNext;
         toNode.InNext = edgeId;
 
-        //add an edge: it links from and to, carrying linked list information for inEdge and outEdge
-        var newEdge = new Edge(data, from, to, inEdge, outEdge);
+        //add an edge: it links from and to, carrying linked list information for inHead and outHead
+        var newEdge = new Edge(data, from, to, inHead, outHead);
         _edges.Add(newEdge);
 
         return edgeId;
@@ -185,7 +187,8 @@ public class Graph<N, E>
         }
         public override string ToString()
         {
-            return $"({Data}, {InNode.Id}, {OutNode.Id}, {InNext?.Id}, {OutNext?.Id})";
+            return $"({Data}, {InNode.Id}, {OutNode.Id}, " +
+            $"{InNext?.Id.ToString() ?? "null"}, {OutNext?.Id.ToString() ?? "null"})";
         }
     }
 }
@@ -202,6 +205,7 @@ public struct NodeId : IComparable<NodeId>
     public static bool operator >(NodeId lhs, NodeId rhs) => lhs.Id > rhs.Id;
     public override bool Equals(object obj) => obj is NodeId rhs && Id == rhs.Id;
     public override int GetHashCode() => Id.GetHashCode();
+    public override string ToString() => Id.ToString();
     public int CompareTo(NodeId other) => this.Id.CompareTo(other.Id);
 }
 
@@ -217,5 +221,6 @@ public struct EdgeId : IComparable<EdgeId>
     public static bool operator >(EdgeId lhs, EdgeId rhs) => lhs.Id > rhs.Id;
     public override bool Equals(object obj) => obj is NodeId rhs && Id == rhs.Id;
     public override int GetHashCode() => Id.GetHashCode();
+    public override string ToString() => Id.ToString();
     public int CompareTo(EdgeId other) => this.Id.CompareTo(other.Id);
 }

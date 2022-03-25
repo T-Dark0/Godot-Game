@@ -48,15 +48,17 @@ public class WorldGenerator
         {
             var fromCentre = fromRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
             var toCentre = toRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
-            //The graph is supposed to be undirected, so don't insert the same node twice in opposite directions
+            //The graph is supposed to be undirected, so don't insert the same edge twice in opposite directions
             var from = fromId;
             var to = toId;
             if (from < to)
             {
                 var temp = from;
                 from = to;
-                to = from;
+                to = temp;
             }
+            //TODO: currently this check is necessary to avoid parallel edges. This may become unnecessary in the future if 
+            //the graph class gains a method do do it
             if (!graph.ContainsEdge(from, to))
             {
                 graph.AddEdge(from, to, pathFactory.Create(fromCentre, toCentre));
@@ -114,21 +116,4 @@ public class WorldGenerator
         var toCentre = to.BoundingBox.GetCentre(CentreSkew.BottomRight);
         return fromCentre.Distance(toCentre);
     }
-}
-
-static class LinqExtension
-{
-    public static IEnumerable<(T, T)> Combinations2<T>(this IEnumerable<T> iter)
-    {
-        var counter = 0;
-        foreach (var right in iter)
-        {
-            foreach (var left in iter.Take(counter))
-            {
-                yield return (left, right);
-            }
-            counter++;
-        }
-    }
-
 }
