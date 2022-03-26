@@ -7,6 +7,8 @@ public class Player : Area2D
 #nullable disable //loaded in _Ready()
     private Camera2D _camera;
 #nullable enable 
+    private bool _running;
+
     private Vector2i _coords;
     public Vector2i Coords
     {
@@ -36,21 +38,31 @@ public class Player : Area2D
 
     private void HandleMovement(InputEvent @event)
     {
+        if (@event.IsActionPressed("move_run"))
+        {
+            _running = true;
+        }
+        else if (@event.IsActionReleased("move_run"))
+        {
+            _running = false;
+        }
+        var speed = _running ? 16 : 1;
+
         if (@event.IsActionPressed("move_right"))
         {
-            Coords += Vector2i.Right;
+            Coords += Vector2i.Right * speed;
         }
         if (@event.IsActionPressed("move_left"))
         {
-            Coords += Vector2i.Left;
+            Coords += Vector2i.Left * speed;
         }
         if (@event.IsActionPressed("move_up"))
         {
-            Coords += Vector2i.Up;
+            Coords += Vector2i.Up * speed;
         }
         if (@event.IsActionPressed("move_down"))
         {
-            Coords += Vector2i.Down;
+            Coords += Vector2i.Down * speed;
         }
     }
 
