@@ -1,9 +1,17 @@
 using System.Collections.Generic;
+using System.Text;
 
+/// <summary>
+/// A variant of a Union-Find data structure, as described on
+/// https://en.wikipedia.org/wiki/Disjoint-set_data_structure
+/// </summary>
 public class UnionFindGraph<N, E>
 {
     private Graph<N, E> _graph;
     private List<PointMeta> _metadata = new List<PointMeta>();
+
+    public int NodeCount { get { return _graph.NodeCount; } }
+    public int EdgeCount { get { return _graph.EdgeCount; } }
 
     public UnionFindGraph(Graph<N, E> graph)
     {
@@ -38,6 +46,22 @@ public class UnionFindGraph<N, E>
     public IEnumerable<(EdgeId id, E data)> Edges()
     {
         return _graph.Edges();
+    }
+
+    public override string ToString()
+    {
+        var builder = new StringBuilder(_graph.ToString());
+        var metas = _metadata.GetEnumerator();
+        builder.Append("\ngroups:");
+        if (metas.MoveNext())
+        {
+            builder.AppendFormat(" {0}", metas.Current);
+        }
+        while (metas.MoveNext())
+        {
+            builder.AppendFormat(", {0}", metas.Current);
+        }
+        return builder.ToString();
     }
 
     private NodeId FindRoot(NodeId point)
@@ -111,6 +135,11 @@ public class UnionFindGraph<N, E>
                 else return null;
 
             }
+        }
+
+        public override string ToString()
+        {
+            return _meta >= 0 ? $"P{new NodeId(_meta)}" : $"R{-_meta}";
         }
 
         private PointMeta(NodeId id)

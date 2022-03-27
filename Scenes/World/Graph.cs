@@ -49,45 +49,6 @@ public class Graph<N, E>
 
         return edgeId;
     }
-    /*
-    public bool ContainsEdge(NodeId from, NodeId to)
-    {
-        var fromNode = _GetNode(from);
-        return
-            EdgesOfOutgoing(from).Any(pair => _GetEdge(pair.id).OutNode == to)
-            || EdgesOfIngoing(from).Any(pair => _GetEdge(pair.id).InNode == to);
-    }
-
-    public bool ContainsEdgeUndirected(NodeId node1, NodeId node2)
-    {
-        if (node2 > node1)
-        {
-            var temp = node1;
-            node1 = node2;
-            node2 = temp;
-        }
-        return ContainsEdge(node1, node2);
-    }
-    
-    public IEnumerable<(NodeId id, N data)> Neighbors(NodeId node)
-    {
-        var outgoing = EdgesOfOutgoing(node)
-            .Select(pair =>
-            {
-                var edge = _GetEdge(pair.id);
-                var nodeId = edge.OutNode;
-                return (nodeId, _GetNode(nodeId).Data);
-            });
-        var ingoing = EdgesOfIngoing(node)
-            .Select(pair =>
-            {
-                var edge = _GetEdge(pair.id);
-                var nodeId = edge.InNode;
-                return (nodeId, _GetNode(nodeId).Data);
-            });
-        return outgoing.Concat(ingoing);
-    }
-    */
 
     public IEnumerable<(NodeId id, N data)> Nodes()
     {
@@ -103,17 +64,22 @@ public class Graph<N, E>
     {
         var builder = new StringBuilder();
         var nodes = _nodes.GetEnumerator();
-        nodes.MoveNext();
-        builder.AppendFormat("nodes: {0}", nodes.Current.Data);
+        if (nodes.MoveNext())
+        {
+            builder.AppendFormat("nodes: {0}", nodes.Current.Data);
+        }
         while (nodes.MoveNext())
         {
             builder.AppendFormat(", {0}", nodes.Current.Data);
         }
 
         var edges = _edges.GetEnumerator();
-        edges.MoveNext();
-        var first = edges.Current;
-        builder.AppendFormat("\nedges: {0}->{1}", GetNode(first.InNode).Data, GetNode(first.OutNode).Data);
+        builder.Append("\nedges:");
+        if (edges.MoveNext())
+        {
+            var first = edges.Current;
+            builder.AppendFormat(" {0}->{1}", GetNode(first.InNode).Data, GetNode(first.OutNode).Data);
+        }
         while (edges.MoveNext())
         {
             var edge = edges.Current;
@@ -133,32 +99,6 @@ public class Graph<N, E>
     {
         return _edges[id.Id];
     }
-
-    /*
-    private IEnumerable<(EdgeId id, E data)> EdgesOfOutgoing(NodeId node)
-    {
-        var nodeNode = GetNode(node);
-        var currentEdgeIdOpt = nodeNode.OutNext;
-        while (currentEdgeIdOpt is EdgeId currentEdgeId)
-        {
-            var currentEdge = GetEdge(currentEdgeId);
-            yield return (currentEdgeId, currentEdge.Data);
-            currentEdgeIdOpt = currentEdge.OutNext;
-        }
-    }
-
-    private IEnumerable<(EdgeId id, E data)> EdgesOfIngoing(NodeId node)
-    {
-        var nodeNode = GetNode(node);
-        var currentEdgeIdOpt = nodeNode.InNext;
-        while (currentEdgeIdOpt is EdgeId currentEdgeId)
-        {
-            var currentEdge = GetEdge(currentEdgeId);
-            yield return (currentEdgeId, currentEdge.Data);
-            currentEdgeIdOpt = currentEdge.InNext;
-        }
-    }
-    */
 
     private class Node
     {
