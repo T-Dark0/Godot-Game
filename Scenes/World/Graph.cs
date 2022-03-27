@@ -26,8 +26,8 @@ public class Graph<N, E>
     public EdgeId AddEdge(NodeId from, NodeId to, E data)
     {
         //See the comment on Edge for an explanation of the concept at the basis of this
-        var fromNode = _GetNode(from);
-        var toNode = _GetNode(to);
+        var fromNode = GetNode(from);
+        var toNode = GetNode(to);
 
         var edgeId = new EdgeId(_edges.Count);
 
@@ -49,7 +49,7 @@ public class Graph<N, E>
 
         return edgeId;
     }
-
+    /*
     public bool ContainsEdge(NodeId from, NodeId to)
     {
         var fromNode = _GetNode(from);
@@ -58,35 +58,17 @@ public class Graph<N, E>
             || EdgesOfIngoing(from).Any(pair => _GetEdge(pair.id).InNode == to);
     }
 
-    public IEnumerable<(EdgeId id, E data)> EdgesOfOutgoing(NodeId node)
+    public bool ContainsEdgeUndirected(NodeId node1, NodeId node2)
     {
-        var nodeNode = _GetNode(node);
-        var currentEdgeIdOpt = nodeNode.OutNext;
-        while (currentEdgeIdOpt is EdgeId currentEdgeId)
+        if (node2 > node1)
         {
-            var currentEdge = _GetEdge(currentEdgeId);
-            yield return (currentEdgeId, currentEdge.Data);
-            currentEdgeIdOpt = currentEdge.OutNext;
+            var temp = node1;
+            node1 = node2;
+            node2 = temp;
         }
+        return ContainsEdge(node1, node2);
     }
-
-    public IEnumerable<(EdgeId id, E data)> EdgesOfIngoing(NodeId node)
-    {
-        var nodeNode = _GetNode(node);
-        var currentEdgeIdOpt = nodeNode.InNext;
-        while (currentEdgeIdOpt is EdgeId currentEdgeId)
-        {
-            var currentEdge = _GetEdge(currentEdgeId);
-            yield return (currentEdgeId, currentEdge.Data);
-            currentEdgeIdOpt = currentEdge.InNext;
-        }
-    }
-
-    public IEnumerable<(EdgeId id, E data)> EdgesOf(NodeId node)
-    {
-        return EdgesOfOutgoing(node).Concat(EdgesOfIngoing(node));
-    }
-
+    
     public IEnumerable<(NodeId id, N data)> Neighbors(NodeId node)
     {
         var outgoing = EdgesOfOutgoing(node)
@@ -105,6 +87,7 @@ public class Graph<N, E>
             });
         return outgoing.Concat(ingoing);
     }
+    */
 
     public IEnumerable<(NodeId id, N data)> Nodes()
     {
@@ -130,36 +113,52 @@ public class Graph<N, E>
         var edges = _edges.GetEnumerator();
         edges.MoveNext();
         var first = edges.Current;
-        builder.AppendFormat("\nedges: {0}->{1}", _GetNode(first.InNode).Data, _GetNode(first.OutNode).Data);
+        builder.AppendFormat("\nedges: {0}->{1}", GetNode(first.InNode).Data, GetNode(first.OutNode).Data);
         while (edges.MoveNext())
         {
             var edge = edges.Current;
-            var from = _GetNode(edge.InNode);
-            var to = _GetNode(edge.OutNode);
+            var from = GetNode(edge.InNode);
+            var to = GetNode(edge.OutNode);
             builder.AppendFormat(", {0}->{1}", from.Data, to.Data);
         }
         return builder.ToString();
     }
 
-    public N GetNode(NodeId id)
-    {
-        return _GetNode(id).Data;
-    }
-
-    public E GetEdge(EdgeId id)
-    {
-        return _GetEdge(id).Data;
-    }
-
-    private Node _GetNode(NodeId id)
+    private Node GetNode(NodeId id)
     {
         return _nodes[id.Id];
     }
 
-    private Edge _GetEdge(EdgeId id)
+    private Edge GetEdge(EdgeId id)
     {
         return _edges[id.Id];
     }
+
+    /*
+    private IEnumerable<(EdgeId id, E data)> EdgesOfOutgoing(NodeId node)
+    {
+        var nodeNode = GetNode(node);
+        var currentEdgeIdOpt = nodeNode.OutNext;
+        while (currentEdgeIdOpt is EdgeId currentEdgeId)
+        {
+            var currentEdge = GetEdge(currentEdgeId);
+            yield return (currentEdgeId, currentEdge.Data);
+            currentEdgeIdOpt = currentEdge.OutNext;
+        }
+    }
+
+    private IEnumerable<(EdgeId id, E data)> EdgesOfIngoing(NodeId node)
+    {
+        var nodeNode = GetNode(node);
+        var currentEdgeIdOpt = nodeNode.InNext;
+        while (currentEdgeIdOpt is EdgeId currentEdgeId)
+        {
+            var currentEdge = GetEdge(currentEdgeId);
+            yield return (currentEdgeId, currentEdge.Data);
+            currentEdgeIdOpt = currentEdge.InNext;
+        }
+    }
+    */
 
     private class Node
     {

@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using Godot;
 
@@ -6,6 +5,11 @@ public readonly struct Rect2i
 {
     public readonly Vector2i Origin;
     public readonly Vector2i Size;
+
+    public int Left { get { return Origin.x; } }
+    public int Right { get { return Origin.x + Size.x - 1; } }
+    public int Top { get { return Origin.y; } }
+    public int Bottom { get { return Origin.y + Size.y - 1; } }
 
     private Rect2i(int left, int right, int top, int bottom)
     {

@@ -14,57 +14,74 @@ public class WorldGenerator
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = seed;
 
-        CreateRoomGraph(rng, size, edgeBoundary, map);
+        CreateRoomGraph(rng, size, edgeBoundary, map.Graph);
     }
 
-    private static void CreateRoomGraph(Random rng, int size, int edgeBoundary, Map map)
+    private static void CreateRoomGraph(Random rng, int size, int edgeBoundary, Graph<Room, Path> inGraph)
     {
-        var graph = map.Graph;
+        var graph = new UnionFindGraph<Room, Path>(inGraph);
 
-        //Generate all the rooms
         var roomFactory = new Room.Factory(rng);
+        var pathFactory = new Path.RecursiveBisectFactory(rng.Next());
+
+        //create all the rooms
         foreach (var location in RoomLocations(rng, size, edgeBoundary))
         {
-            graph.AddNode(roomFactory.Create(location));
+            var fromRoom = roomFactory.Create(location);
+            var fromId = graph.AddNode(fromRoom);
         }
 
-        var connectedRooms = graph.Nodes()
-            .SelectMany(fromPair =>
-            {
-                var closestRoomDistance = graph.Nodes()
-                    .Where(toPair => toPair.id != fromPair.id)
-                    .Select(toPair => RoomDistance(fromPair.data, toPair.data))
-                    .Min();
-                var distanceThreshold = (int)(closestRoomDistance * (rng.NextDouble() * 0.2 + 1.2));
-                var roomsInRange = graph.Nodes()
-                    .Where(
-                        toPair => toPair.id != fromPair.id
-                        && RoomDistance(fromPair.data, toPair.data) < distanceThreshold
-                    );
-                return RepeatForever(fromPair).Zip(roomsInRange, (from, to) => (from, to));
-            });
-        var pathFactory = new Path.RecursiveBisectFactory(rng.Next());
-        foreach (var ((fromId, fromRoom), (toId, toRoom)) in connectedRooms)
+        //for each room, select a random other room the path to which isn't obstructed by some third room
+        var paths = graph.Nodes()
+            .Select(from => graph.Nodes()
+                .Select(to => (fromRoom: from, toRoom: to))
+                .Where(pair =>
+                    pair.fromRoom.id != pair.toRoom.id
+                    && !IsRoomBetween(pair.fromRoom.data, pair.toRoom.data, graph)
+                )
+                .Random(rng)
+            );
+        //and add that path to the graph
+        foreach (var ((fromId, fromRoom), (toId, toRoom)) in paths)
         {
-            var fromCentre = fromRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
-            var toCentre = toRoom.BoundingBox.GetCentre(CentreSkew.BottomRight);
-            //The graph is supposed to be undirected, so don't insert the same edge twice in opposite directions
-            var from = fromId;
-            var to = toId;
-            if (from < to)
-            {
-                var temp = from;
-                from = to;
-                to = temp;
-            }
-            //TODO: currently this check is necessary to avoid parallel edges. This may become unnecessary in the future if 
-            //the graph class gains a method do do it
-            if (!graph.ContainsEdge(from, to))
-            {
-                graph.AddEdge(from, to, pathFactory.Create(fromCentre, toCentre));
-            }
+            var fromCentre = GetRoomCentre(fromRoom);
+            var toCentre = GetRoomCentre(toRoom);
+            graph.AddEdge(fromId, toId, pathFactory.Create(fromCentre, toCentre));
         }
         GD.Print(graph);
+    }
+
+    /// <summary>
+    /// Simplified version of the Cohen–Sutherland algorithm, 
+    /// taken from https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm<br/>
+    /// In particular, since we don't care about where the intersection is, just that it exists,
+    /// we don't compute the intersection point
+    /// </summary>
+    private static bool IsRoomBetween(Room from, Room to, UnionFindGraph<Room, Path> graph)
+    {
+        var fromPoint = GetRoomCentre(from);
+        var toPoint = GetRoomCentre(to);
+        return graph
+            .Nodes()
+            .Select(room => (CategorizeSide(fromPoint, room.data.BoundingBox), CategorizeSide(toPoint, room.data.BoundingBox)))
+            .Where(pair => pair.Item1 != Side.Inside && pair.Item2 != Side.Inside)
+            .Any(pair => (pair.Item1 & pair.Item2) == 0);
+    }
+
+    private static Side CategorizeSide(Vector2i point, Rect2i rectangle)
+    {
+        var side = Side.Inside;
+        if (point.x < rectangle.Left) side |= Side.Left;
+        else if (point.x > rectangle.Right) side |= Side.Right;
+        if (point.y < rectangle.Top) side |= Side.Up;
+        else if (point.y > rectangle.Bottom) side |= Side.Down;
+        GD.PrintRaw($"\tpoint: {point}, rect. {rectangle}, side: {side}\n");
+        return side;
+    }
+
+    private static Vector2i GetRoomCentre(Room room)
+    {
+        return room.BoundingBox.GetCentre(CentreSkew.BottomRight);
     }
 
     private static List<Vector2i> RoomLocations(Random rng, int mapSize, int mapEdgeBoundary)
@@ -105,15 +122,35 @@ public class WorldGenerator
         locations.Add(bestCandidate!.Value);
     }
 
-    private static IEnumerable<T> RepeatForever<T>(T elem)
+    [Flags]
+    private enum Side : byte
     {
-        while (true) yield return elem;
+        Inside = 0,
+        Up = 0b0001,
+        Down = 0b0010,
+        Left = 0b0100,
+        Right = 0b1000,
     }
+}
 
-    private static float RoomDistance(Room from, Room to)
+static class RandomFromEnumerableExtension
+{
+    /// <summary>
+    /// Reservoir sampling, specialized for the case in which we only want to extract a single element.
+    /// Adapted from https://en.wikipedia.org/wiki/Reservoir_sampling
+    /// </summary>
+    public static T? Random<T>(this IEnumerable<T> iter, Random rng)
     {
-        var fromCentre = from.BoundingBox.GetCentre(CentreSkew.BottomRight);
-        var toCentre = to.BoundingBox.GetCentre(CentreSkew.BottomRight);
-        return fromCentre.Distance(toCentre);
+        var consumed = 0;
+        var result = default(T);
+        foreach (var elem in iter)
+        {
+            consumed++;
+            if (rng.Next(consumed) == 0)
+            {
+                result = elem;
+            }
+        }
+        return result;
     }
 }
