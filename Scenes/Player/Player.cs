@@ -19,7 +19,7 @@ public class Player : Area2D
         private set
         {
             _coords = value;
-            Position = (Vector2)value * Globals.TileSize + new Vector2(0.5f, 0.5f);
+            Position = ((Vector2)value + new Vector2(0.5f, 0.5f)) * Globals.TileSize;
         }
     }
 
