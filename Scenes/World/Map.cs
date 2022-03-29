@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 
 public class Map : TileMap
@@ -46,16 +45,15 @@ public class Map : TileMap
         set { this[coords.x, coords.y] = value; }
     }
 
-    static int[] colors = {
-        unchecked((int)0xFFFFFFFF), //white
-        unchecked((int)0xFF0000FF), //red
-        unchecked((int)0x00FF00FF), //green
-        unchecked((int)0x0000FFFF), //blue
-        unchecked((int)0x00FFFFFF), //cyan
-        unchecked((int)0xFF00FFFF), //purple
-        unchecked((int)0xFFFF00FF), //yellow
+    static Color[] colors = {
+        new Color(unchecked((int)0xFFFFFFFF)), //white
+        new Color(unchecked((int)0xFF0000FF)), //red
+        new Color(unchecked((int)0x00FF00FF)), //green
+        new Color(unchecked((int)0x0000FFFF)), //blue
+        new Color(unchecked((int)0x00FFFFFF)), //cyan
+        new Color(unchecked((int)0xFF00FFFF)), //purple
+        new Color(unchecked((int)0xFFFF00FF)), //yellow
     };
-
     public override void _Draw()
     {
         foreach (var (_, room) in Graph.Nodes())
@@ -70,11 +68,11 @@ public class Map : TileMap
         var color = 0;
         foreach (var (_, path) in Graph.Edges())
         {
-            for (int i = 0; i < path.Points.Count - 1; i++)
+            foreach (var (f, t) in path.Points().Windows2())
             {
-                var from = (Vector2)path.Points[i] * Globals.TileSize;
-                var to = (Vector2)path.Points[i + 1] * Globals.TileSize;
-                DrawLine(from, to, new Color(colors[color]));
+                var from = (Vector2)(f * Globals.TileSize);
+                var to = (Vector2)(t * Globals.TileSize);
+                DrawLine(from, to, colors[color]);
             }
             color = (color + 1) % colors.Length;
         }

@@ -25,8 +25,12 @@ public readonly struct Vector2i
 
     public float Distance(Vector2i other)
     {
-        var (dx, dy) = other - this;
-        return (float)Math.Sqrt(dx * dx + dy * dy);
+        return (other - this).Length();
+    }
+
+    public float Length()
+    {
+        return (float)Math.Sqrt(x * x + y * y);
     }
 
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);

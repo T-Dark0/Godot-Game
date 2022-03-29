@@ -1,19 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using Godot;
 
 public class Room
 {
-    public ReadOnlyDictionary<Vector2i, Tile> Tiles { get; private set; }
     public Rect2i BoundingBox { get; private set; }
+    private Dictionary<Vector2i, Tile> _tiles;
     private char _name;
 
-    private Room(ReadOnlyDictionary<Vector2i, Tile> tiles, Rect2i boundingBox, char name)
+    private Room(Dictionary<Vector2i, Tile> tiles, Rect2i boundingBox, char name)
     {
-        Tiles = tiles;
+        _tiles = tiles;
         BoundingBox = boundingBox;
         _name = name;
+    }
+
+    public IEnumerable<(Vector2i Coords, Tile Tile)> Tiles()
+    {
+        return _tiles.Select(pair => (pair.Key, pair.Value));
     }
 
     public override string ToString()
@@ -83,7 +88,7 @@ public class Room
             }
 
             return new Room(
-                new ReadOnlyDictionary<Vector2i, Tile>(tiles),
+                tiles,
                 Rect2i.FromSides(left, right, top, bottom),
                 _name++
             );

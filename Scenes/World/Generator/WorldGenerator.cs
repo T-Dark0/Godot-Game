@@ -15,6 +15,7 @@ public class WorldGenerator
         roomNoise.Seed = seed;
 
         CreateRoomGraph(rng, size, edgeBoundary, map.Graph);
+        GraphToMap(map);
     }
 
     private static void CreateRoomGraph(Random rng, int size, int edgeBoundary, Graph<Room, Path> inGraph)
@@ -22,7 +23,6 @@ public class WorldGenerator
         var graph = new UnionFindGraph<Room, Path>(inGraph);
 
         var roomFactory = new Room.Factory(rng);
-        var pathFactory = new Path.RecursiveBisectFactory(rng.Next());
 
         //create all the rooms
         foreach (var location in RoomLocations(rng, size, edgeBoundary))
@@ -30,67 +30,7 @@ public class WorldGenerator
             var fromRoom = roomFactory.Create(location);
             var fromId = graph.AddNode(fromRoom);
         }
-
-        // To ensure connectedness, we build a spanning tree before adding more random edges (todo)
-        // for each room, select a random other room:
-        // - the path to which isn't obstructed by some third room
-        // - which won't form a cycle if connected to this room
-        // It's possible that a given room will fail to find any existing other room satisfying both constraints
-        // In that case, we simply don't create an edge from that given room. A random room will pick up the slack later
-        // Proof: (TODO: make this clearer, possibly move to somewhere other than here)
-        // Consider that there is _always_ a reachable room ignoring cycle detection, because if a given room is obstructed,
-        // then the obstruction itself is a reachable room
-        // Then, the only reason we can fail to find a room to connect to is that all reachable rooms are
-        // already in the same "group" of nodes.
-        // This means that whichever node we would have connected to, had it not been for the obstruction, is still
-        // not in our group of nodes, which in turn implies that its turn to be the current node will come later
-        var paths = graph.Nodes()
-            .SelectWhere(from => graph.Nodes()
-                .Select(to => (fromRoom: from, toRoom: to))
-                .Where(pair =>
-                    !graph.WouldFormCycle(pair.fromRoom.id, pair.toRoom.id)
-                    && !IsRoomBetween(pair.fromRoom.data, pair.toRoom.data, graph)
-                )
-                .Random(rng)
-            );
-        foreach (var ((fromId, fromRoom), (toId, toRoom)) in paths)
-        {
-            var fromCentre = GetRoomCentre(fromRoom);
-            var toCentre = GetRoomCentre(toRoom);
-            graph.AddEdge(fromId, toId, pathFactory.Create(fromCentre, toCentre));
-        }
-    }
-
-    /// <summary>
-    /// Simplified version of the Cohen–Sutherland algorithm, 
-    /// taken from https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm<br/>
-    /// In particular, since we don't care about where the intersection is, just that it exists,
-    /// we don't compute the intersection point
-    /// </summary>
-    private static bool IsRoomBetween(Room from, Room to, UnionFindGraph<Room, Path> graph)
-    {
-        var fromPoint = GetRoomCentre(from);
-        var toPoint = GetRoomCentre(to);
-        return graph
-            .Nodes()
-            .Select(room => (CategorizeSide(fromPoint, room.data.BoundingBox), CategorizeSide(toPoint, room.data.BoundingBox)))
-            .Where(pair => pair.Item1 != Side.Inside && pair.Item2 != Side.Inside)
-            .Any(pair => (pair.Item1 & pair.Item2) == 0);
-    }
-
-    private static Side CategorizeSide(Vector2i point, Rect2i rectangle)
-    {
-        var side = Side.Inside;
-        if (point.x < rectangle.Left) side |= Side.Left;
-        else if (point.x > rectangle.Right) side |= Side.Right;
-        if (point.y < rectangle.Top) side |= Side.Up;
-        else if (point.y > rectangle.Bottom) side |= Side.Down;
-        return side;
-    }
-
-    private static Vector2i GetRoomCentre(Room room)
-    {
-        return room.BoundingBox.GetCentre(CentreSkew.BottomRight);
+        CreateMinSpanningTree(rng, graph);
     }
 
     private static List<Vector2i> RoomLocations(Random rng, int mapSize, int mapEdgeBoundary)
@@ -131,6 +71,73 @@ public class WorldGenerator
         locations.Add(bestCandidate!.Value);
     }
 
+    // To ensure that the graph is fully connected, we first begin a minimum spanning tree before adding more edges
+    // randomly to make it more interesting.
+    // Building an MST per se wouldn't be terribly difficult. However, we have to work under a second constraint as well:
+    // a room A may not connect to a room B if there exists a room C between them, blocking the way
+    // 
+    // Given a room A, there always is at least one other room that it can reach without a third room being in the way:
+    // if there _is_ a room in the way, then that room, not the originally intended one, is a room that A can reach
+    // However, there doesn't have to always be a room that isn't yet connected to A. (in fact, in an MST implementation
+    // without the "no rooms in the way" constraint, every node would be able to find another node to connect to, except for the
+    // very last node visited).
+    // In our case, it's possible for a room that _isn't_ the last to be unable to find another room to connect to,
+    // because all reachable candidates are already connected to it
+    // In that case, we simply discard the room and don't bother connecting it to anything
+    // This causes the algorithm to "fall behind" by one edge, so to speak
+    // However, the graph is still guaranteed to be connected: A later room, which would have been unable to find anyone
+    // not yet connected to it otherwise, will be able to make a connection
+    private static void CreateMinSpanningTree(Random rng, UnionFindGraph<Room, Path> graph)
+    {
+        var pathFactory = new Path.RecursiveBisectFactory(rng.Next());
+
+        var paths = graph.Nodes()
+            .SelectWhere(from => graph.Nodes()
+                .Select(to => (fromRoom: from, toRoom: to))
+                .Where(pair =>
+                    !graph.WouldFormCycle(pair.fromRoom.id, pair.toRoom.id)
+                    && !IsRoomBetween(pair.fromRoom.data, pair.toRoom.data, graph)
+                )
+                .Random(rng)
+            );
+        foreach (var ((fromId, fromRoom), (toId, toRoom)) in paths)
+        {
+            var fromCentre = GetRoomCentre(fromRoom);
+            var toCentre = GetRoomCentre(toRoom);
+            graph.AddEdge(fromId, toId, pathFactory.Create(fromCentre, toCentre));
+        }
+    }
+
+    // Simplified version of the Cohen–Sutherland algorithm, 
+    // taken from https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm<br/>
+    // In particular, since we don't care about where the intersection is, just that it exists,
+    // we don't compute the intersection point
+    private static bool IsRoomBetween(Room from, Room to, UnionFindGraph<Room, Path> graph)
+    {
+        var fromPoint = GetRoomCentre(from);
+        var toPoint = GetRoomCentre(to);
+        return graph
+            .Nodes()
+            .Select(room => (CategorizeSide(fromPoint, room.data.BoundingBox), CategorizeSide(toPoint, room.data.BoundingBox)))
+            .Where(pair => pair.Item1 != Side.Inside && pair.Item2 != Side.Inside)
+            .Any(pair => (pair.Item1 & pair.Item2) == 0);
+    }
+
+    private static Vector2i GetRoomCentre(Room room)
+    {
+        return room.BoundingBox.GetCentre(CentreSkew.BottomRight);
+    }
+
+    private static Side CategorizeSide(Vector2i point, Rect2i rectangle)
+    {
+        var side = Side.Inside;
+        if (point.x < rectangle.Left) side |= Side.Left;
+        else if (point.x > rectangle.Right) side |= Side.Right;
+        if (point.y < rectangle.Top) side |= Side.Up;
+        else if (point.y > rectangle.Bottom) side |= Side.Down;
+        return side;
+    }
+
     [Flags]
     private enum Side : byte
     {
@@ -140,42 +147,46 @@ public class WorldGenerator
         Left = 0b0100,
         Right = 0b1000,
     }
-}
 
-// NOTE: the methods in this class are restricted to T: struct because C# behaves really awkwardly otherwise
-// Specifically, it will make Random return a defaulted T instead of a null one
-// and it will make SelectWhere return U? even though the declared return type is U
-static class RandomFromEnumerableExtension
-{
-    /// <summary>
-    /// Reservoir sampling, specialized for the case in which we only want to extract a single element.
-    /// Adapted from https://en.wikipedia.org/wiki/Reservoir_sampling
-    /// </summary>
-    public static T? Random<T>(this IEnumerable<T> iter, Random rng) where T : struct
+    private static void GraphToMap(Map map)
     {
-        var consumed = 0;
-        T? result = null;
-        foreach (var elem in iter)
+        foreach (var (_, room) in map.Graph.Nodes())
         {
-            consumed++;
-            if (rng.Next(consumed) == 0)
+            foreach (var (coord, tile) in room.Tiles())
             {
-                result = elem;
+                SetTile(map, coord, tile);
+            }
+            map[GetRoomCentre(room)] = Tile.DebugRed;
+        }
+        foreach (var (_, path) in map.Graph.Edges())
+        {
+            foreach (var (coord, tile) in path.Tiles())
+            {
+                SetTile(map, coord, tile);
             }
         }
-        return result;
     }
 
-    /// <summary>
-    /// Combined Select and Where: if the function returns an element, the resulting enumerable
-    /// will contain that element, and if the function returns null, the element is dropped instead
-    /// <summary>
-    public static IEnumerable<U> SelectWhere<T, U>(this IEnumerable<T> iter, Func<T, U?> f) where U : struct
+    private static void SetTile(Map map, Vector2i coord, Tile tile)
     {
-        foreach (var elem in iter)
+        switch (tile)
         {
-            var mapped = f(elem);
-            if (mapped is U u) yield return u;
+            case Tile.Wall:
+                if (map[coord] == Tile.Empty)
+                {
+                    map[coord] = Tile.Wall;
+                }
+                break;
+            case Tile.Floor:
+                var current = map[coord];
+                if (current == Tile.Empty || current == Tile.Wall)
+                {
+                    map[coord] = Tile.Floor;
+                }
+                break;
+            default:
+                map[coord] = tile;
+                break;
         }
     }
 }
