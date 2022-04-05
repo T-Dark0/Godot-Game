@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public class Map : TileMap
@@ -26,5 +27,12 @@ public class Map : TileMap
     {
         get { return this[coords.x, coords.y]; }
         set { this[coords.x, coords.y] = value; }
+    }
+
+    public Vector2i GetRandomTile(Random rng, Tile kind)
+    {
+        var cells = GetUsedCellsById((int)kind);
+        var rand = rng.Next(cells.Count);
+        return (Vector2i)cells[rand];
     }
 }

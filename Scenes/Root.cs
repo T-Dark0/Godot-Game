@@ -12,11 +12,16 @@ public class Root : Node2D
         _map = GetNode<Map>("Map");
         _player = GetNode<Player>("Player");
         var seed = Guid.NewGuid().GetHashCode();
-        WorldGenerator.Generate(seed, Globals.MapSize, Globals.MapEdgeBoundary, _map);
+        WorldGenerator.Generate(seed, Globals.MapSize, _map);
     }
 
     public override void _Process(float delta)
     {
-        OS.SetWindowTitle($"{_player.Coords}");
+
+    }
+
+    private void GameLoop()
+    {
+
     }
 }

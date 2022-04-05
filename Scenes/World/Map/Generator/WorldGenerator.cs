@@ -7,25 +7,27 @@ public class WorldGenerator
 {
     private const int CANDIDATE_COUNT = 100;
     private const float THRESHOLD = 0.45f;
+    private const int MIN_ROOM_COUNT = 5;
+    private const int MAX_ROOM_COUNT = 8;
 
-    public static void Generate(int seed, int size, int edgeBoundary, Map map)
+    public static void Generate(int seed, int size, Map map)
     {
         var rng = new Random(seed);
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = seed;
 
-        CreateRoomGraph(rng, size, edgeBoundary, map.Graph);
+        CreateRoomGraph(rng, size, map.Graph);
         GraphToMap(map);
     }
 
-    private static void CreateRoomGraph(Random rng, int size, int edgeBoundary, Graph<Room, Path> inGraph)
+    private static void CreateRoomGraph(Random rng, int size, Graph<Room, Path> inGraph)
     {
         var graph = new UnionFindGraph<Room, Path>(inGraph);
 
         var roomFactory = new Room.Factory(rng);
 
         //create all the rooms
-        foreach (var location in RoomLocations(rng, size, edgeBoundary))
+        foreach (var location in RoomLocations(rng, size))
         {
             var fromRoom = roomFactory.Create(location);
             var fromId = graph.AddNode(fromRoom);
@@ -33,27 +35,24 @@ public class WorldGenerator
         CreateMinSpanningTree(rng, graph);
     }
 
-    private static List<Vector2i> RoomLocations(Random rng, int mapSize, int mapEdgeBoundary)
+    private static List<Vector2i> RoomLocations(Random rng, int mapSize)
     {
         var locations = new List<Vector2i>();
-        var roomCount = rng.Next(5, 8);
+        var roomCount = rng.Next(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
         for (int i = 0; i < roomCount; i++)
         {
-            AddRoomLocation(locations, rng, mapSize, mapEdgeBoundary);
+            AddRoomLocation(locations, rng, mapSize);
         }
         return locations;
     }
 
-    private static void AddRoomLocation(List<Vector2i> locations, Random rng, int mapSize, int mapEdgeBoundary)
+    private static void AddRoomLocation(List<Vector2i> locations, Random rng, int mapSize)
     {
-        var min = mapEdgeBoundary;
-        var max = mapSize - mapEdgeBoundary;
-
         Vector2i? bestCandidate = null;
         var bestDistance = 0.0;
         for (int i = 0; i < CANDIDATE_COUNT; i++)
         {
-            var candidate = new Vector2i(rng.Next(min, max), rng.Next(min, max));
+            var candidate = new Vector2i(rng.Next(mapSize), rng.Next(mapSize));
             var distance = locations
                 .Select(location =>
                 {

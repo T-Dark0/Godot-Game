@@ -1,6 +1,6 @@
 using Godot;
 
-public class Player : Area2D
+public class Player : Sprite
 {
     private const float ZoomStep = 1.2f;
 
