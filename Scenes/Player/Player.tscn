@@ -12,10 +12,8 @@ script = ExtResource( 1 )
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2( 16, 16 )
 shape = SubResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="."]
-position = Vector2( 16, 16 )
 scale = Vector2( 0.25, 0.25 )
 texture = ExtResource( 2 )

@@ -156,7 +156,6 @@ public class WorldGenerator
             {
                 SetTile(map, coord, tile);
             }
-            map[GetRoomCentre(room)] = Tile.DebugRed;
         }
         foreach (var (_, path) in map.Graph.Edges())
         {

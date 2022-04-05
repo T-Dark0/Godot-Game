@@ -17,6 +17,6 @@ public class Root : Node2D
 
     public override void _Process(float delta)
     {
-        OS.SetWindowTitle($"{_player.Coords + (1, 1)}");
+        OS.SetWindowTitle($"{_player.Coords}");
     }
 }
