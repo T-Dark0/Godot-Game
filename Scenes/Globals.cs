@@ -1,5 +1,5 @@
 public class Globals
 {
-    public const int MapSize = 128;
-    public const int TileSize = 16;
+    public const int MAP_SIZE = 128;
+    public const int TILE_SIZE = 16;
 }

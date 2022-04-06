@@ -10,11 +10,10 @@ public class WorldGenerator
     private const int MIN_ROOM_COUNT = 5;
     private const int MAX_ROOM_COUNT = 8;
 
-    public static void Generate(int seed, int size, Map map)
+    public static void Generate(Random rng, int size, Map map)
     {
-        var rng = new Random(seed);
         var roomNoise = new OpenSimplexNoise();
-        roomNoise.Seed = seed;
+        roomNoise.Seed = rng.Next();
 
         CreateRoomGraph(rng, size, map.Graph);
         GraphToMap(map);

@@ -33,6 +33,6 @@ public class Map : TileMap
     {
         var cells = GetUsedCellsById((int)kind);
         var rand = rng.Next(cells.Count);
-        return (Vector2i)cells[rand];
+        return (Vector2i)(Vector2)cells[rand];
     }
 }

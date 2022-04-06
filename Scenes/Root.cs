@@ -3,25 +3,15 @@ using Godot;
 
 public class Root : Node2D
 {
-#nullable disable //These fields aren't _really_ nullable: they're set in _Ready, which might as well be a constructor.
+#nullable disable //Initialized in _Ready
     private Player _player;
-    private Map _map;
+    private Level _level;
 #nullable enable
     public override void _Ready()
     {
-        _map = GetNode<Map>("Map");
+        _level = GetNode<Level>("Level");
         _player = GetNode<Player>("Player");
-        var seed = Guid.NewGuid().GetHashCode();
-        WorldGenerator.Generate(seed, Globals.MapSize, _map);
-    }
 
-    public override void _Process(float delta)
-    {
-
-    }
-
-    private void GameLoop()
-    {
-
+        _level.Initialize(new Random(), _player);
     }
 }
