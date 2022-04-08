@@ -9,24 +9,25 @@ public class WorldGenerator
     private const float THRESHOLD = 0.45f;
     private const int MIN_ROOM_COUNT = 5;
     private const int MAX_ROOM_COUNT = 8;
+    private const int MAP_SIZE = 128;
 
-    public static void Generate(Random rng, int size, Map map)
+    public static void Generate(Random rng, WorldMap map)
     {
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = rng.Next();
 
-        CreateRoomGraph(rng, size, map.Graph);
+        CreateRoomGraph(rng, map.Graph);
         GraphToMap(map);
     }
 
-    private static void CreateRoomGraph(Random rng, int size, Graph<Room, Path> inGraph)
+    private static void CreateRoomGraph(Random rng, Graph<Room, Path> inGraph)
     {
         var graph = new UnionFindGraph<Room, Path>(inGraph);
 
         var roomFactory = new Room.Factory(rng);
 
         //create all the rooms
-        foreach (var location in RoomLocations(rng, size))
+        foreach (var location in RoomLocations(rng))
         {
             var fromRoom = roomFactory.Create(location);
             var fromId = graph.AddNode(fromRoom);
@@ -34,24 +35,24 @@ public class WorldGenerator
         CreateMinSpanningTree(rng, graph);
     }
 
-    private static List<Vector2i> RoomLocations(Random rng, int mapSize)
+    private static List<Vector2i> RoomLocations(Random rng)
     {
         var locations = new List<Vector2i>();
         var roomCount = rng.Next(MIN_ROOM_COUNT, MAX_ROOM_COUNT);
         for (int i = 0; i < roomCount; i++)
         {
-            AddRoomLocation(locations, rng, mapSize);
+            AddRoomLocation(locations, rng);
         }
         return locations;
     }
 
-    private static void AddRoomLocation(List<Vector2i> locations, Random rng, int mapSize)
+    private static void AddRoomLocation(List<Vector2i> locations, Random rng)
     {
         Vector2i? bestCandidate = null;
         var bestDistance = 0.0;
         for (int i = 0; i < CANDIDATE_COUNT; i++)
         {
-            var candidate = new Vector2i(rng.Next(mapSize), rng.Next(mapSize));
+            var candidate = new Vector2i(rng.Next(MAP_SIZE), rng.Next(MAP_SIZE));
             var distance = locations
                 .Select(location =>
                 {
@@ -146,7 +147,7 @@ public class WorldGenerator
         Right = 0b1000,
     }
 
-    private static void GraphToMap(Map map)
+    private static void GraphToMap(WorldMap map)
     {
         foreach (var (_, room) in map.Graph.Nodes())
         {
@@ -164,7 +165,7 @@ public class WorldGenerator
         }
     }
 
-    private static void SetTile(Map map, Vector2i coord, Tile tile)
+    private static void SetTile(WorldMap map, Vector2i coord, Tile tile)
     {
         switch (tile)
         {

@@ -8,7 +8,6 @@ public class Player : Entity
 #nullable disable //loaded in _Ready()
     private Camera2D _camera;
 #nullable enable 
-    private bool _running;
 
     [Signal]
     private delegate void Input(InputEvent @event);
@@ -32,19 +31,12 @@ public class Player : Entity
     public override void _UnhandledInput(InputEvent @event)
     {
         EmitSignal(nameof(Input), @event);
+        HandleZoom(@event);
     }
 
     private InputResult HandleMovement(InputEvent @event)
     {
-        if (@event.IsActionPressed("move_run"))
-        {
-            _running = true;
-        }
-        else if (@event.IsActionReleased("move_run"))
-        {
-            _running = false;
-        }
-        var speed = _running ? 16 : 1;
+        var speed = Godot.Input.IsActionPressed("move_run") ? 16 : 1;
         var result = InputResult.Continue;
 
         if (@event.IsActionPressed("move_right", allowEcho: true))

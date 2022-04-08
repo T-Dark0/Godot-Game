@@ -9,10 +9,9 @@ public class Level : Node2D
     private Random _rng;
 #nullable enable
     private List<Entity> _entities = new List<Entity>();
-    private ulong _turn_counter = 0;
+    private ulong _turnCounter = 0;
 
     private const int SPAWN_INTERVAL = 36;
-
 
     public override void _Ready()
     {
@@ -23,22 +22,20 @@ public class Level : Node2D
     {
         _rng = rng;
         _entities.Add(player);
-
-        WorldGenerator.Generate(rng, Globals.MAP_SIZE, _map);
-        player.Coords = _map.GetRandomTile(rng, Tile.Floor);
+        _map.Initialize(rng);
     }
 
     public async void GameLoop()
     {
         while (true) //TODO: game end condition
         {
-            _turn_counter++;
-            GD.Print("turn ", _turn_counter);
+            _turnCounter++;
+            GD.Print("turn ", _turnCounter);
             foreach (var entity in _entities)
             {
                 await entity.PlayTurn();
             }
-            if (_turn_counter % SPAWN_INTERVAL == 0)
+            if (_turnCounter % SPAWN_INTERVAL == 0)
             {
                 SpawnEnemy();
             }
