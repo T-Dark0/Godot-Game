@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 
 public abstract class Entity : Sprite
@@ -20,11 +21,6 @@ public abstract class Entity : Sprite
     {
         Coords = coords;
     }
-    public void EndTurn()
-    {
-        EmitSignal(nameof(Level.PassTurn));
-    }
 
-    public virtual void OnTurnStart() { }
-    public virtual void Input(InputEvent @event) { }
+    public abstract Task PlayTurn();
 }

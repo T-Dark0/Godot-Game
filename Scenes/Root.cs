@@ -13,5 +13,6 @@ public class Root : Node2D
         _player = GetNode<Player>("Player");
 
         _level.Initialize(new Random(), _player);
+        _level.GameLoop();
     }
 }
