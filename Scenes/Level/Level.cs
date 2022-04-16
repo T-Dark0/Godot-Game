@@ -14,7 +14,6 @@ public class Level : Node2D
     private ulong _turnCounter = 0;
 
     private const int SPAWN_INTERVAL = 36;
-    private const int VISION_RADIUS = 15;
 
     public override void _Ready()
     {
@@ -54,6 +53,11 @@ public class Level : Node2D
     public void RevealAround(Vector2i viewpoint, int radius)
     {
         _visibilityMap.RevealAround(_worldMap, viewpoint, radius);
+    }
+
+    public bool IsVisible(Vector2i point)
+    {
+        return _visibilityMap[point] == VisibilityTile.Empty;
     }
 
     private void SpawnEnemy()
