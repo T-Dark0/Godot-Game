@@ -27,7 +27,7 @@ public class Level : Node2D
         _player = player;
 
         WorldGenerator.Generate(rng, _worldMap);
-        SpawnEntity(_player);
+        SpawnPlayer(_player);
         _visibilityMap.Initialize(_worldMap);
     }
 
@@ -60,17 +60,19 @@ public class Level : Node2D
         return _visibilityMap[point] == VisibilityTile.Empty;
     }
 
-    private void SpawnEnemy()
-    {
-        var enemyIndex = _rng.Next(Enemies.List.Length);
-        SpawnEntity(Enemies.List[enemyIndex].Instance<Entity>());
-    }
-
-    private void SpawnEntity(Entity entity)
+    private void SpawnPlayer(Player player)
     {
         var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
-        entity.Initialize(tile);
-        _entities.Add(entity);
-        AddChild(entity);
+        player.Initialize(tile);
+        _entities.Add(player);
+    }
+
+    private void SpawnEnemy()
+    {
+        var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
+        var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
+        enemy.Initialize(tile);
+        _entities.Add(enemy);
+        AddChild(enemy);
     }
 }
