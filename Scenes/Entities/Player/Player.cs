@@ -9,6 +9,8 @@ public class Player : Entity
     private Camera2D _camera;
 #nullable enable 
 
+    public const int VISION_RADIUS = 15;
+
     [Signal]
     private delegate void Input(InputEvent @event);
 
@@ -18,7 +20,7 @@ public class Player : Entity
         _camera.MakeCurrent();
     }
 
-    public override async Task PlayTurn()
+    public override async Task PlayTurn(Level level)
     {
         InputResult result;
         do
@@ -26,6 +28,7 @@ public class Player : Entity
             var input = (InputEvent)(await ToSignal(this, nameof(Input)))[0];
             result = HandleMovement(input);
         } while (result == InputResult.Continue);
+        level.RevealAround(Coords, VISION_RADIUS);
     }
 
     public override void _UnhandledInput(InputEvent @event)

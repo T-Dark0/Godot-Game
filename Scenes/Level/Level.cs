@@ -34,20 +34,26 @@ public class Level : Node2D
 
     public async void GameLoop()
     {
+        RevealAround(_player.Coords, Player.VISION_RADIUS);
+
         while (true) //TODO: game end condition
         {
-            _visibilityMap.RevealAround(_worldMap, _player.Coords, VISION_RADIUS);
             _turnCounter++;
             GD.Print("turn ", _turnCounter);
             foreach (var entity in _entities)
             {
-                await entity.PlayTurn();
+                await entity.PlayTurn(this);
             }
             if (_turnCounter % SPAWN_INTERVAL == 0)
             {
                 SpawnEnemy();
             }
         }
+    }
+
+    public void RevealAround(Vector2i viewpoint, int radius)
+    {
+        _visibilityMap.RevealAround(_worldMap, viewpoint, radius);
     }
 
     private void SpawnEnemy()

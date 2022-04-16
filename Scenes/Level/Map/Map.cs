@@ -17,6 +17,6 @@ public class Map : Node2D
     public void Initialize(Random rng)
     {
         WorldGenerator.Generate(rng, _worldMap);
-        _visibilityMap.BlackOut(_worldMap);
+        _visibilityMap.Initialize(_worldMap);
     }
 }

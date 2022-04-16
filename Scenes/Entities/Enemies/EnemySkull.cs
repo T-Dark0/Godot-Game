@@ -3,7 +3,7 @@ using Godot;
 
 public class EnemySkull : Entity
 {
-    public override async Task PlayTurn()
+    public override async Task PlayTurn(Level level)
     {
         GD.Print("skull turn start");
         await ToSignal(GetTree().CreateTimer(1), "timeout");

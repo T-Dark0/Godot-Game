@@ -22,5 +22,5 @@ public abstract class Entity : Sprite
         Coords = coords;
     }
 
-    public abstract Task PlayTurn();
+    public abstract Task PlayTurn(Level level);
 }
