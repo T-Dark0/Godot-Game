@@ -22,11 +22,12 @@ public class Player : Entity
 
     public override async Task PlayTurn(Level level)
     {
-        InputResult result;
+        InputResult result = InputResult.Continue;
         do
         {
             var input = (InputEvent)(await ToSignal(this, nameof(Input)))[0];
-            result = HandleMovement(input);
+            result = HandleMovement(input, level, result);
+            result = await HandleSpellcast(input, level, result);
         } while (result == InputResult.Continue);
         level.RevealAround(Coords, VISION_RADIUS);
     }
@@ -37,30 +38,41 @@ public class Player : Entity
         HandleZoom(@event);
     }
 
-    private InputResult HandleMovement(InputEvent @event)
+    private InputResult HandleMovement(InputEvent @event, Level level, InputResult result)
     {
         var speed = Godot.Input.IsActionPressed("move_run") ? 16 : 1;
-        var result = InputResult.Continue;
 
         if (@event.IsActionPressed("move_right", allowEcho: true))
         {
-            Coords += Vector2i.Right * speed;
-            result = InputResult.EndTurn;
+            Actions.MoveEntity(level, this, Coords + Vector2i.Right * speed);
+            return InputResult.EndTurn;
         }
         if (@event.IsActionPressed("move_left", allowEcho: true))
         {
-            Coords += Vector2i.Left * speed;
-            result = InputResult.EndTurn;
+            Actions.MoveEntity(level, this, Coords + Vector2i.Left * speed);
+            return InputResult.EndTurn;
         }
         if (@event.IsActionPressed("move_up", allowEcho: true))
         {
-            Coords += Vector2i.Up * speed;
-            result = InputResult.EndTurn;
+            Actions.MoveEntity(level, this, Coords + Vector2i.Up * speed);
+            return InputResult.EndTurn;
         }
         if (@event.IsActionPressed("move_down", allowEcho: true))
         {
-            Coords += Vector2i.Down * speed;
-            result = InputResult.EndTurn;
+            Actions.MoveEntity(level, this, Coords + Vector2i.Down * speed);
+            return InputResult.EndTurn;
+        }
+        return result;
+    }
+
+    private async Task<InputResult> HandleSpellcast(InputEvent @event, Level level, InputResult result)
+    {
+        if (@event.IsActionPressed("light_arrow"))
+        {
+            var globalMouse = GetGlobalMousePosition();
+            var arrow = LightArrow.Instance();
+            await Actions.FireProjectile(level, arrow, GlobalPosition, globalMouse);
+            return InputResult.EndTurn;
         }
         return result;
     }

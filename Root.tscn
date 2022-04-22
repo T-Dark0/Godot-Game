@@ -109,7 +109,7 @@ format = 1
 script = ExtResource( 8 )
 
 [node name="VisibilityMap" type="TileMap" parent="Level"]
-z_index = 2
+z_index = 10
 tile_set = SubResource( 3 )
 cell_size = Vector2( 16, 16 )
 format = 1

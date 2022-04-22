@@ -45,7 +45,7 @@ public class Level : Node2D
             }
             if (_turnCounter % SPAWN_INTERVAL == 0)
             {
-                SpawnEnemy();
+                SpawnRandomEnemy();
             }
         }
     }
@@ -60,6 +60,11 @@ public class Level : Node2D
         return _visibilityMap[point] == VisibilityTile.Empty;
     }
 
+    public Vector2i GetTileCoordsAt(Vector2 globalCoords)
+    {
+        return _worldMap.GetTileCoordsAt(globalCoords);
+    }
+
     private void SpawnPlayer(Player player)
     {
         var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
@@ -67,7 +72,7 @@ public class Level : Node2D
         _entities.Add(player);
     }
 
-    private void SpawnEnemy()
+    private void SpawnRandomEnemy()
     {
         var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
         var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
