@@ -5,20 +5,19 @@ using Godot;
 public class Level : Node2D
 {
 #nullable disable //initialized in _Ready or in Initialize
-    private WorldMap _worldMap;
-    private VisibilityMap _visibilityMap;
+    public Map Map;
     private Player _player;
     private Random _rng;
 #nullable enable
     private List<Entity> _entities = new List<Entity>();
+    public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
     private ulong _turnCounter = 0;
 
     private const int SPAWN_INTERVAL = 36;
 
     public override void _Ready()
     {
-        _worldMap = GetNode<WorldMap>("WorldMap");
-        _visibilityMap = GetNode<VisibilityMap>("VisibilityMap");
+        Map = GetNode<Map>("Map");
     }
 
     public void Initialize(Random rng, Player player)
@@ -26,19 +25,18 @@ public class Level : Node2D
         _rng = rng;
         _player = player;
 
-        WorldGenerator.Generate(rng, _worldMap);
+        Map.Initialize(rng);
         SpawnPlayer(_player);
-        _visibilityMap.Initialize(_worldMap);
+        Map.RevealAround(_player.Coords, Player.VISION_RADIUS);
     }
 
     public async void GameLoop()
     {
-        RevealAround(_player.Coords, Player.VISION_RADIUS);
-
         while (true) //TODO: game end condition
         {
             _turnCounter++;
             GD.Print("turn ", _turnCounter);
+
             foreach (var entity in _entities)
             {
                 await entity.PlayTurn(this);
@@ -50,34 +48,21 @@ public class Level : Node2D
         }
     }
 
-    public void RevealAround(Vector2i viewpoint, int radius)
-    {
-        _visibilityMap.RevealAround(_worldMap, viewpoint, radius);
-    }
-
-    public bool IsVisible(Vector2i point)
-    {
-        return _visibilityMap[point] == VisibilityTile.Empty;
-    }
-
-    public Vector2i GetTileCoordsAt(Vector2 globalCoords)
-    {
-        return _worldMap.GetTileCoordsAt(globalCoords);
-    }
-
     private void SpawnPlayer(Player player)
     {
-        var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
+        var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
         player.Initialize(tile);
         _entities.Add(player);
+        EntityPositions.Add(player.Coords, player);
     }
 
     private void SpawnRandomEnemy()
     {
         var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
-        var tile = _worldMap.GetRandomTile(_rng, Tile.Floor);
+        var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
         enemy.Initialize(tile);
         _entities.Add(enemy);
         AddChild(enemy);
+        EntityPositions.Add(enemy.Coords, enemy);
     }
 }

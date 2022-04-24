@@ -3,20 +3,21 @@ using Godot;
 
 public class Player : Entity
 {
-    private const float ZoomStep = 1.2f;
+    private const float ZOOM_STEP = 1.2f;
+    private const uint BASE_HEALTH = 100;
+    public const int VISION_RADIUS = 15;
 
 #nullable disable //loaded in _Ready()
     private Camera2D _camera;
 #nullable enable 
-
-    public const int VISION_RADIUS = 15;
 
     [Signal]
     private delegate void Input(InputEvent @event);
 
     public override void _Ready()
     {
-        _camera = GetNode<Camera2D>("Camera2D");
+        base._Ready();
+        _camera = GetNode<Camera2D>("Camera");
         _camera.MakeCurrent();
     }
 
@@ -29,7 +30,7 @@ public class Player : Entity
             result = HandleMovement(input, level, result);
             result = await HandleSpellcast(input, level, result);
         } while (result == InputResult.Continue);
-        level.RevealAround(Coords, VISION_RADIUS);
+        level.Map.RevealAround(Coords, VISION_RADIUS);
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -69,9 +70,8 @@ public class Player : Entity
     {
         if (@event.IsActionPressed("light_arrow"))
         {
-            var globalMouse = GetGlobalMousePosition();
-            var arrow = LightArrow.Instance();
-            await Actions.FireProjectile(level, arrow, GlobalPosition, globalMouse);
+            var mouse = level.Map.GetTileCoordsAt(GetGlobalMousePosition());
+            await Actions.FireProjectile(level, LightArrowFactory.Instance, Coords, mouse);
             return InputResult.EndTurn;
         }
         return result;
@@ -81,11 +81,11 @@ public class Player : Entity
     {
         if (@event.IsActionPressed("zoom_in"))
         {
-            _camera.Zoom /= ZoomStep;
+            _camera.Zoom /= ZOOM_STEP;
         }
         else if (@event.IsActionPressed("zoom_out"))
         {
-            _camera.Zoom *= ZoomStep;
+            _camera.Zoom *= ZOOM_STEP;
         }
     }
 }

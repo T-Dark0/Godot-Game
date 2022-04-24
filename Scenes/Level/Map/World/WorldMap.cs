@@ -24,11 +24,6 @@ public class WorldMap : TileMap
         return (Vector2i)(Vector2)cells[rand];
     }
 
-    public Vector2i GetTileCoordsAt(Vector2 globalCoords)
-    {
-        return (Vector2i)WorldToMap(ToLocal(globalCoords));
-    }
-
     public IEnumerable<Vector2i> TileCoords()
     {
         foreach (Vector2 coord in GetUsedCells())

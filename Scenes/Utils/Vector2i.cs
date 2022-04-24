@@ -23,16 +23,6 @@ public readonly struct Vector2i
         y = this.y;
     }
 
-    public float Distance(Vector2i other)
-    {
-        return (other - this).Length();
-    }
-
-    public float Length()
-    {
-        return (float)Math.Sqrt(x * x + y * y);
-    }
-
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);
 
     public static explicit operator Vector2(Vector2i vec) => new Vector2(vec.x, vec.y);

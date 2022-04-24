@@ -1,18 +1,19 @@
 using System.Threading.Tasks;
-using Godot;
 
 public class Actions
 {
     public static void MoveEntity(Level level, Entity entity, Vector2i destination)
     {
+        level.EntityPositions.Remove(entity.Coords);
         entity.Coords = destination;
+        level.EntityPositions.Add(entity.Coords, entity); //TODO: this throws if two entities move onto each other
     }
 
-    public static async Task FireProjectile(Level level, Projectile projectile, Vector2 globalFrom, Vector2 globalTo)
+    public static async Task FireProjectile(Level level, ProjectileFactory factory, Vector2i from, Vector2i to)
     {
+        var projectile = factory.Create();
         level.AddChild(projectile);
-        projectile.Initialize(globalFrom, globalTo);
-        await level.ToSignal(projectile, nameof(Projectile.TargetReached));
+        await projectile.Fire(level, from, to);
         level.RemoveChild(projectile);
         projectile.QueueFree();
     }

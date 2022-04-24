@@ -1,32 +1,40 @@
+using System.Threading.Tasks;
 using Godot;
 
-public abstract class Projectile : Sprite
+public class Projectile : Node2D
 {
-    protected abstract float Speed { get; }
+    [Export]
+    public float Speed;
+    [Export]
+    public uint Damage;
 
-    private float _distanceTravelled = 0;
-    private Vector2 _direction;
-    private float _targetDistance;
+#nullable disable //Initialized in _Ready
+    public Sprite Sprite;
+    public Tween Tween;
+#nullable enable
 
-    [Signal]
-    public delegate void TargetReached();
-
-    public void Initialize(Vector2 globalPosition, Vector2 globalDestination)
+    public override void _Ready()
     {
-        GlobalPosition = globalPosition;
-        LookAt(globalDestination);
-        _direction = globalPosition.DirectionTo(globalDestination);
-        _targetDistance = globalPosition.DistanceTo(globalDestination);
+        Sprite = GetNode<Sprite>("Sprite");
+        Tween = GetNode<Tween>("Tween");
     }
 
-    public override void _PhysicsProcess(float delta)
+    public async Task Fire(Level level, Vector2i from, Vector2i to)
     {
-        var distance = Speed * delta;
-        Position = Position + _direction * distance;
-        _distanceTravelled += distance;
-        if (_distanceTravelled > _targetDistance)
-        {
-            EmitSignal(nameof(TargetReached));
-        }
+        var globalFrom = level.Map.GetGlobalTileCoords(from);
+        var globalTo = level.Map.GetGlobalTileCoords(to);
+
+        GlobalPosition = globalFrom;
+        LookAt(globalTo);
+        var targetDistance = globalFrom.DistanceTo(globalTo) / Globals.TILE_SIZE;
+        var time = targetDistance / Speed;
+        Tween.InterpolateProperty(this, "global_position", null, globalTo, time);
+        Tween.Start();
+        await ToSignal(Tween, "tween_completed");
     }
+}
+
+public interface ProjectileFactory
+{
+    public Projectile Create();
 }
