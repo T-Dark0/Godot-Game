@@ -7,7 +7,7 @@ public class Player : Entity
     private const uint BASE_HEALTH = 100;
     public const int VISION_RADIUS = 15;
 
-#nullable disable //loaded in _Ready()
+#nullable disable //Initialized in _Ready()
     private Camera2D _camera;
 #nullable enable 
 
@@ -70,8 +70,8 @@ public class Player : Entity
     {
         if (@event.IsActionPressed("light_arrow"))
         {
-            var mouse = level.Map.GetTileCoordsAt(GetGlobalMousePosition());
-            await Actions.FireProjectile(level, LightArrowFactory.Instance, Coords, mouse);
+            var target = level.Map.TileAtGlobalCoords(GetGlobalMousePosition());
+            await Actions.FireProjectile(level, LightArrowFactory.Instance, Coords, target);
             return InputResult.EndTurn;
         }
         return result;

@@ -35,12 +35,12 @@ public class Map : Node2D
         return _visibility[point] == VisibilityTile.Empty;
     }
 
-    public Vector2i GetTileCoordsAt(Vector2 globalCoords)
+    public Vector2i TileAtGlobalCoords(Vector2 globalCoords)
     {
         return (Vector2i)_world.WorldToMap(_world.ToLocal(globalCoords));
     }
 
-    public Vector2 GetGlobalTileCoords(Vector2i tile)
+    public Vector2 GlobalCoordsOfTile(Vector2i tile)
     {
         return _world.ToGlobal(_world.MapToWorld((Vector2)tile)) + new Vector2(Globals.TILE_SIZE / 2, Globals.TILE_SIZE / 2);
     }

@@ -12,3 +12,5 @@ texture = ExtResource( 2 )
 
 [node name="Health" type="Node" parent="."]
 script = ExtResource( 3 )
+Current = 40
+Max = 40

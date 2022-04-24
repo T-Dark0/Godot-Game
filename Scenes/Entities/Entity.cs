@@ -6,6 +6,7 @@ public abstract class Entity : Node2D
 #nullable disable //initialized in _Ready
     public Health Health;
     public Sprite Sprite;
+    public int Id;
 #nullable enable
 
     private Vector2i _coords;
@@ -28,9 +29,10 @@ public abstract class Entity : Node2D
         Sprite = GetNode<Sprite>("Sprite");
     }
 
-    public void Initialize(Vector2i coords)
+    public void Initialize(Vector2i coords, int id)
     {
         Coords = coords;
+        Id = id;
     }
 
     public abstract Task PlayTurn(Level level);

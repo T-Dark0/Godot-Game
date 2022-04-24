@@ -37,9 +37,9 @@ public class Level : Node2D
             _turnCounter++;
             GD.Print("turn ", _turnCounter);
 
-            foreach (var entity in _entities)
+            for (int i = 0; i < _entities.Count; i++)
             {
-                await entity.PlayTurn(this);
+                await _entities[i].PlayTurn(this);
             }
             if (_turnCounter % SPAWN_INTERVAL == 0)
             {
@@ -51,7 +51,8 @@ public class Level : Node2D
     private void SpawnPlayer(Player player)
     {
         var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
-        player.Initialize(tile);
+        player.Initialize(tile, _entities.Count);
+        player.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
         _entities.Add(player);
         EntityPositions.Add(player.Coords, player);
     }
@@ -60,9 +61,26 @@ public class Level : Node2D
     {
         var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
         var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
-        enemy.Initialize(tile);
-        _entities.Add(enemy);
         AddChild(enemy);
+        enemy.Initialize(tile, _entities.Count);
+        enemy.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
+        GD.Print($"new enemy coords: {enemy.Coords}. player coords: {_player.Coords}");
+        _entities.Add(enemy);
         EntityPositions.Add(enemy.Coords, enemy);
+    }
+
+    private void OnEntityDeath(Health health)
+    {
+        var entity = (Entity)health.Owner;
+
+        var last = _entities.Count - 1;
+        var lastEntity = _entities[last];
+        lastEntity.Id = entity.Id;
+        _entities[entity.Id] = lastEntity;
+        _entities.RemoveAt(last);
+        EntityPositions.Remove(entity.Coords);
+
+        RemoveChild(entity);
+        entity.QueueFree();
     }
 }

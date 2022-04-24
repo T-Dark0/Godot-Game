@@ -19,10 +19,10 @@ public class Projectile : Node2D
         Tween = GetNode<Tween>("Tween");
     }
 
-    public async Task Fire(Level level, Vector2i from, Vector2i to)
+    public async Task<Vector2i> Fire(Level level, Vector2i from, Vector2i to)
     {
-        var globalFrom = level.Map.GetGlobalTileCoords(from);
-        var globalTo = level.Map.GetGlobalTileCoords(to);
+        var globalFrom = level.Map.GlobalCoordsOfTile(from);
+        var globalTo = level.Map.GlobalCoordsOfTile(to);
 
         GlobalPosition = globalFrom;
         LookAt(globalTo);
@@ -31,6 +31,7 @@ public class Projectile : Node2D
         Tween.InterpolateProperty(this, "global_position", null, globalTo, time);
         Tween.Start();
         await ToSignal(Tween, "tween_completed");
+        return to;
     }
 }
 
