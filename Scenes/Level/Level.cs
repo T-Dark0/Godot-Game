@@ -61,10 +61,10 @@ public class Level : Node2D
     {
         var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
         var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
+        if (EntityPositions.ContainsKey(tile)) return; //don't spawn enemies into other things
         AddChild(enemy);
         enemy.Initialize(tile, _entities.Count);
         enemy.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
-        GD.Print($"new enemy coords: {enemy.Coords}. player coords: {_player.Coords}");
         _entities.Add(enemy);
         EntityPositions.Add(enemy.Coords, enemy);
     }

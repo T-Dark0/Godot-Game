@@ -17,3 +17,5 @@ texture = ExtResource( 2 )
 script = ExtResource( 3 )
 Current = 100
 Max = 100
+
+[node name="Tween" type="Tween" parent="."]

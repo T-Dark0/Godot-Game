@@ -6,6 +6,7 @@ public abstract class Entity : Node2D
 #nullable disable //initialized in _Ready
     public Health Health;
     public Sprite Sprite;
+    public Tween Tween;
     public int Id;
 #nullable enable
 
@@ -27,6 +28,7 @@ public abstract class Entity : Node2D
     {
         Health = GetNode<Health>("Health");
         Sprite = GetNode<Sprite>("Sprite");
+        Tween = GetNode<Tween>("Tween");
     }
 
     public void Initialize(Vector2i coords, int id)

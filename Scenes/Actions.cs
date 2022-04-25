@@ -1,15 +1,24 @@
+using System;
 using System.Threading.Tasks;
 
 public class Actions
 {
-    public static void MoveEntity(Level level, Entity entity, Vector2i destination)
+    public static ActionResult MoveEntity(Level level, Entity entity, Vector2i destination)
     {
         level.EntityPositions.Remove(entity.Coords);
-        entity.Coords = destination;
-        level.EntityPositions.Add(entity.Coords, entity); //TODO: this throws if two entities move onto each other
+        try //if two entities move onto each other, not crashing would probably be a good idea, so we simply declare the action failed
+        {
+            level.EntityPositions.Add(destination, entity);
+            entity.Coords = destination;
+        }
+        catch (ArgumentException)
+        {
+            return ActionResult.Failure;
+        }
+        return ActionResult.Success;
     }
 
-    public static async Task FireProjectile(Level level, ProjectileFactory factory, Vector2i from, Vector2i to)
+    public static async Task<ActionResult> FireProjectile(Level level, ProjectileFactory factory, Vector2i from, Vector2i to)
     {
         var projectile = factory.Create();
 
@@ -24,5 +33,12 @@ public class Actions
         }
 
         projectile.QueueFree();
+        return ActionResult.Success;
     }
+}
+
+public enum ActionResult
+{
+    Success,
+    Failure,
 }
