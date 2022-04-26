@@ -2,15 +2,10 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
+namespace GameMap;
+
 public class WorldMap : TileMap
 {
-    public Graph<Room, Path> Graph;
-
-    private WorldMap()
-    {
-        Graph = new Graph<Room, Path>();
-    }
-
     public Tile this[Vector2i coords]
     {
         get { return (Tile)GetCell(coords.x, coords.y); }
@@ -73,5 +68,22 @@ public class WorldMap : TileMap
         }
         path.Reverse();
         return path;
+    }
+}
+
+public enum Tile
+{
+    Empty = -1,
+    Wall = 0,
+    Floor = 1,
+    DebugRed = 2,
+    DebugGreen = 3,
+}
+
+public static class TileMethods
+{
+    public static bool BlocksLight(this Tile tile)
+    {
+        return tile == Tile.Wall || tile == Tile.Empty;
     }
 }

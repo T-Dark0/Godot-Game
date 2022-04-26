@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+namespace GameMap;
+
 // The methods and types in this class are adapted from https://www.albertford.com/shadowcasting/
 public class FieldOfView
 {

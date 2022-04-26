@@ -1,5 +1,7 @@
 using Godot;
 
+namespace GameMap;
+
 public class VisibilityMap : TileMap
 {
     public VisibilityTile this[Vector2i coords]

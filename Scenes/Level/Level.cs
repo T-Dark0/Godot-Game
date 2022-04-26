@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameMap;
 using Godot;
 
 public class Level : Node2D

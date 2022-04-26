@@ -1,6 +1,8 @@
 using System;
 using Godot;
 
+namespace GameMap;
+
 public class Map : Node2D
 {
 #nullable disable //initialized in _Ready()
@@ -16,7 +18,7 @@ public class Map : Node2D
 
     public void Initialize(Random rng)
     {
-        WorldGenerator.Generate(rng, _world);
+        WorldGenerator.Generator.Generate(rng, _world);
         _visibility.Initialize(_world);
     }
 

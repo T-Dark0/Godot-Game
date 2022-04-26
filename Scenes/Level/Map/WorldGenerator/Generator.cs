@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameMap;
 using Godot;
 
-public class WorldGenerator
+namespace WorldGenerator;
+
+public class Generator
 {
     private const int CANDIDATE_COUNT = 100;
     private const float THRESHOLD = 0.45f;
@@ -16,8 +19,10 @@ public class WorldGenerator
         var roomNoise = new OpenSimplexNoise();
         roomNoise.Seed = rng.Next();
 
-        CreateRoomGraph(rng, map.Graph);
-        GraphToMap(map);
+        var graph = new Graph<Room, Path>();
+
+        CreateRoomGraph(rng, graph);
+        GraphToMap(map, graph);
     }
 
     private static void CreateRoomGraph(Random rng, Graph<Room, Path> inGraph)
@@ -147,16 +152,16 @@ public class WorldGenerator
         Right = 0b1000,
     }
 
-    private static void GraphToMap(WorldMap map)
+    private static void GraphToMap(WorldMap map, Graph<Room, Path> graph)
     {
-        foreach (var (_, room) in map.Graph.Nodes())
+        foreach (var (_, room) in graph.Nodes())
         {
             foreach (var (coord, tile) in room.Tiles())
             {
                 SetTile(map, coord, tile);
             }
         }
-        foreach (var (_, path) in map.Graph.Edges())
+        foreach (var (_, path) in graph.Edges())
         {
             foreach (var (coord, tile) in path.Tiles())
             {

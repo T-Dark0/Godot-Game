@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameMap;
 using Godot;
+
+namespace WorldGenerator;
 
 public class Room
 {

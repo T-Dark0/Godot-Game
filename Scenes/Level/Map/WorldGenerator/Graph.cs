@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+namespace WorldGenerator;
+
 public class Graph<N, E>
 {
     private List<Node> _nodes;
