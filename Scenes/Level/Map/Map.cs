@@ -35,6 +35,11 @@ public class Map : Node2D
         return _visibility[point] == VisibilityTile.Empty;
     }
 
+    public bool IsPassable(Vector2i point)
+    {
+        return _world[point] == Tile.Floor;
+    }
+
     public Vector2i TileAtGlobalCoords(Vector2 globalCoords)
     {
         return (Vector2i)_world.WorldToMap(_world.ToLocal(globalCoords));

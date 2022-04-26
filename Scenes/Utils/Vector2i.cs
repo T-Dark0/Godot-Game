@@ -6,10 +6,15 @@ public readonly struct Vector2i
     public readonly int x;
     public readonly int y;
 
+    public static Vector2i Zero = new Vector2i(0, 0);
     public static Vector2i Up = new Vector2i(0, -1);
-    public static Vector2i Down = new Vector2i(0, 1);
+    public static Vector2i UpLeft = new Vector2i(-1, -1);
     public static Vector2i Left = new Vector2i(-1, 0);
+    public static Vector2i DownLeft = new Vector2i(-1, 1);
+    public static Vector2i Down = new Vector2i(0, 1);
+    public static Vector2i DownRight = new Vector2i(1, 1);
     public static Vector2i Right = new Vector2i(1, 0);
+    public static Vector2i UpRight = new Vector2i(1, -1);
 
     public Vector2i(int x, int y)
     {
@@ -27,6 +32,31 @@ public readonly struct Vector2i
 
     public static explicit operator Vector2(Vector2i vec) => new Vector2(vec.x, vec.y);
     public static explicit operator Vector2i(Vector2 vec) => new Vector2i((int)vec.x, (int)vec.y);
+
+    public static explicit operator Vector2i(Direction direction) => direction switch
+    {
+        Direction.Up => Vector2i.Up,
+        Direction.UpLeft => Vector2i.UpLeft,
+        Direction.Left => Vector2i.Left,
+        Direction.DownLeft => Vector2i.DownLeft,
+        Direction.Down => Vector2i.Down,
+        Direction.DownRight => Vector2i.DownRight,
+        Direction.Right => Vector2i.Right,
+        Direction.UpRight => Vector2i.UpRight,
+        _ => throw new ArgumentException(),
+    };
+    public static explicit operator Direction?(Vector2i vec) => vec switch
+    {
+        (0, -1) => Direction.Up,
+        (-1, -1) => Direction.UpLeft,
+        (-1, 0) => Direction.Left,
+        (-1, 1) => Direction.DownLeft,
+        (0, 1) => Direction.Down,
+        (1, 1) => Direction.DownRight,
+        (1, 0) => Direction.Right,
+        (1, -1) => Direction.UpRight,
+        _ => null,
+    };
 
     public static Vector2i operator +(Vector2i lhs, Vector2i rhs)
     {

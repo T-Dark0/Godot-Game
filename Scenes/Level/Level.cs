@@ -48,10 +48,15 @@ public class Level : Node2D
         }
     }
 
+    public bool IsPassable(Vector2i coord)
+    {
+        return Map.IsPassable(coord) && !EntityPositions.ContainsKey(coord);
+    }
+
     private void SpawnPlayer(Player player)
     {
         var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
-        player.Initialize(tile, _entities.Count);
+        player.Initialize(this, tile, _entities.Count);
         player.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
         _entities.Add(player);
         EntityPositions.Add(player.Coords, player);
@@ -63,7 +68,7 @@ public class Level : Node2D
         var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
         if (EntityPositions.ContainsKey(tile)) return; //don't spawn enemies into other things
         AddChild(enemy);
-        enemy.Initialize(tile, _entities.Count);
+        enemy.Initialize(this, tile, _entities.Count);
         enemy.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
         _entities.Add(enemy);
         EntityPositions.Add(enemy.Coords, enemy);

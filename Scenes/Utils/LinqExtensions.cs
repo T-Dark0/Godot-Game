@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 // NOTE: some methods in this class are restricted to T: struct because C# behaves really awkwardly otherwise
 // Specifically, it will make Random return a defaulted T instead of a null one
@@ -46,5 +47,10 @@ public static class RandomFromEnumerableExtension
             yield return (left, right);
             left = right;
         }
+    }
+
+    public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> source)
+    {
+        return source.Select((item, index) => (item, index));
     }
 }

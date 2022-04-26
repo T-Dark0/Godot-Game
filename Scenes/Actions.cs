@@ -1,23 +1,7 @@
-using System;
 using System.Threading.Tasks;
 
 public class Actions
 {
-    public static ActionResult MoveEntity(Level level, Entity entity, Vector2i destination)
-    {
-        level.EntityPositions.Remove(entity.Coords);
-        try //if two entities move onto each other, not crashing would probably be a good idea, so we simply declare the action failed
-        {
-            level.EntityPositions.Add(destination, entity);
-            entity.Coords = destination;
-        }
-        catch (ArgumentException)
-        {
-            return ActionResult.Failure;
-        }
-        return ActionResult.Success;
-    }
-
     public static async Task<ActionResult> FireProjectile(Level level, ProjectileFactory factory, Vector2i from, Vector2i to)
     {
         var projectile = factory.Create();

@@ -1,27 +1,31 @@
+using System;
 using System.Threading.Tasks;
 using Godot;
 
 public abstract class Entity : Node2D
 {
-#nullable disable //initialized in _Ready
+#nullable disable //initialized in _Ready or in Initialize
     public Health Health;
     public Sprite Sprite;
     public Tween Tween;
     public int Id;
 #nullable enable
 
-    private Vector2i _coords;
-    public Vector2i Coords
+    public Vector2i Coords { get; private set; }
+
+    public async Task<MoveResult> Move(Level level, Direction direction, uint speed)
     {
-        get
-        {
-            return _coords;
-        }
-        set
-        {
-            _coords = value;
-            Position = ((Vector2)value + new Vector2(0.5f, 0.5f)) * Globals.TILE_SIZE;
-        }
+        var destination = Coords + (Vector2i)direction;
+        if (!level.IsPassable(destination)) return MoveResult.Failure;
+
+        Coords = destination;
+        var targetPosition = level.Map.GlobalCoordsOfTile(Coords);
+        var distance = direction.IsLinear() ? 1.0f : (float)Math.Sqrt(2);
+        var time = distance / speed;
+        Tween.InterpolateProperty(this, "global_position", null, targetPosition, time);
+        Tween.Start();
+        await ToSignal(Tween, "tween_completed");
+        return MoveResult.Success;
     }
 
     public override void _Ready()
@@ -31,11 +35,18 @@ public abstract class Entity : Node2D
         Tween = GetNode<Tween>("Tween");
     }
 
-    public void Initialize(Vector2i coords, int id)
+    public void Initialize(Level level, Vector2i coords, int id)
     {
         Coords = coords;
+        GlobalPosition = level.Map.GlobalCoordsOfTile(coords);
         Id = id;
     }
 
     public abstract Task PlayTurn(Level level);
+
+    public enum MoveResult
+    {
+        Success,
+        Failure,
+    }
 }
