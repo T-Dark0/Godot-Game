@@ -29,7 +29,10 @@ public class VisibilityMap : TileMap
             }
         }
         //Then reveal the tiles that are actually visible
-        FieldOfView.OfViewpoint(map, viewpoint, radius, (coord) => this[coord] = VisibilityTile.Empty);
+        foreach (var coord in FieldOfView.OfViewpoint(new WorldMapView(map), viewpoint, radius))
+        {
+            this[coord] = VisibilityTile.Empty;
+        }
     }
 }
 

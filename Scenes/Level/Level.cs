@@ -7,8 +7,8 @@ public class Level : Node2D
 {
 #nullable disable //initialized in _Ready or in Initialize
     public Map Map;
+    public Random Rng;
     private Player _player;
-    private Random _rng;
 #nullable enable
     private List<Entity> _entities = new List<Entity>();
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
@@ -23,7 +23,7 @@ public class Level : Node2D
 
     public void Initialize(Random rng, Player player)
     {
-        _rng = rng;
+        Rng = rng;
         _player = player;
 
         Map.Initialize(rng);
@@ -56,7 +56,7 @@ public class Level : Node2D
 
     private void SpawnPlayer(Player player)
     {
-        var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
+        var tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
         player.Initialize(this, tile, _entities.Count);
         player.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
         _entities.Add(player);
@@ -65,8 +65,8 @@ public class Level : Node2D
 
     private void SpawnRandomEnemy()
     {
-        var enemy = Enemies.List[_rng.Next(Enemies.List.Length)].Instance<Entity>();
-        var tile = Map.GetRandomTileCoord(_rng, Tile.Floor);
+        var enemy = Enemies.List[Rng.Next(Enemies.List.Length)].Instance<Entity>();
+        var tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
         if (EntityPositions.ContainsKey(tile)) return; //don't spawn enemies into other things
         AddChild(enemy);
         enemy.Initialize(this, tile, _entities.Count);

@@ -71,6 +71,21 @@ public class WorldMap : TileMap
     }
 }
 
+public readonly struct WorldMapView
+{
+    private readonly WorldMap _map;
+
+    public WorldMapView(WorldMap map)
+    {
+        _map = map;
+    }
+
+    public Tile this[Vector2i coords]
+    {
+        get => _map[coords];
+    }
+}
+
 public enum Tile
 {
     Empty = -1,
@@ -83,6 +98,11 @@ public enum Tile
 public static class TileMethods
 {
     public static bool BlocksLight(this Tile tile)
+    {
+        return tile == Tile.Wall || tile == Tile.Empty;
+    }
+
+    public static bool BlocksProjectiles(this Tile tile)
     {
         return tile == Tile.Wall || tile == Tile.Empty;
     }

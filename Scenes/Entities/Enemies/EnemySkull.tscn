@@ -14,3 +14,5 @@ texture = ExtResource( 2 )
 script = ExtResource( 3 )
 Current = 40
 Max = 40
+
+[node name="Tween" type="Tween" parent="."]

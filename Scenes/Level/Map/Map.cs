@@ -10,6 +10,8 @@ public class Map : Node2D
     private VisibilityMap _visibility;
 #nullable enable
 
+    public WorldMapView World { get => new WorldMapView(_world); }
+
     public override void _Ready()
     {
         _world = GetNode<WorldMap>("World");
@@ -27,6 +29,9 @@ public class Map : Node2D
         return _world.GetRandomTile(rng, tile);
     }
 
+    public Tile GetWorldTile(Vector2i coords) => _world[coords];
+    public VisibilityTile GetVisibilityTile(Vector2i coords) => _visibility[coords];
+
     public void RevealAround(Vector2i viewpoint, int radius)
     {
         _visibility.RevealAround(_world, viewpoint, radius);
@@ -42,12 +47,12 @@ public class Map : Node2D
         return _world[point] == Tile.Floor;
     }
 
-    public Vector2i TileAtGlobalCoords(Vector2 globalCoords)
+    public Vector2i TileAtGlobalPosition(Vector2 globalCoords)
     {
         return (Vector2i)_world.WorldToMap(_world.ToLocal(globalCoords));
     }
 
-    public Vector2 GlobalCoordsOfTile(Vector2i tile)
+    public Vector2 GlobalPositionOfTile(Vector2i tile)
     {
         return _world.ToGlobal(_world.MapToWorld((Vector2)tile)) + new Vector2(Globals.TILE_SIZE / 2, Globals.TILE_SIZE / 2);
     }

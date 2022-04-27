@@ -1,4 +1,6 @@
+using System.Linq;
 using System.Threading.Tasks;
+using GameMap;
 using Godot;
 
 public class Projectile : Node2D
@@ -21,8 +23,28 @@ public class Projectile : Node2D
 
     public async Task<Vector2i> Fire(Level level, Vector2i from, Vector2i to)
     {
-        var globalFrom = level.Map.GlobalCoordsOfTile(from);
-        var globalTo = level.Map.GlobalCoordsOfTile(to);
+        var actualTarget = LineOfSight
+            .Between(from, to)
+            .TakeWhile(coord => !level.Map.World[coord].BlocksProjectiles())
+            .Last();
+
+        level.AddChild(this);
+        await this.Animate(level, from, actualTarget);
+        level.RemoveChild(this);
+
+        Entity target;
+        if (level.EntityPositions.TryGetValue(to, out target))
+        {
+            target.Health.TakeDamage(Damage);
+        }
+        QueueFree();
+        return actualTarget;
+    }
+
+    private async Task Animate(Level level, Vector2i from, Vector2i to)
+    {
+        var globalFrom = level.Map.GlobalPositionOfTile(from);
+        var globalTo = level.Map.GlobalPositionOfTile(to);
 
         GlobalPosition = globalFrom;
         LookAt(globalTo);
@@ -31,7 +53,6 @@ public class Projectile : Node2D
         Tween.InterpolateProperty(this, "global_position", null, globalTo, time);
         Tween.Start();
         await ToSignal(Tween, "tween_completed");
-        return to;
     }
 }
 

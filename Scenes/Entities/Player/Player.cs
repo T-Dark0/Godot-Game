@@ -95,8 +95,8 @@ public class Player : Entity
     {
         if (Input.IsActionPressed("light_arrow"))
         {
-            var target = level.Map.TileAtGlobalCoords(GetGlobalMousePosition());
-            await Actions.FireProjectile(level, LightArrowFactory.Instance, Coords, target);
+            var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
+            await Projectiles.LightArrow().Fire(level, Coords, target);
             return InputResult.EndTurn;
         }
         return InputResult.Continue;

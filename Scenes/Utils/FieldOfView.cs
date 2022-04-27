@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
-
-namespace GameMap;
+using GameMap;
 
 // The methods and types in this class are adapted from https://www.albertford.com/shadowcasting/
 public class FieldOfView
 {
-    public static void OfViewpoint(WorldMap map, Vector2i viewpoint, int radius, Action<Vector2i> reveal)
+    public static IEnumerable<Vector2i> OfViewpoint(WorldMapView map, Vector2i viewpoint, int radius)
     {
-        reveal(viewpoint);
+        yield return viewpoint;
         foreach (var quadrant in Quadrant.Quadrants(viewpoint))
         {
-            Scan(map, quadrant, new Row(1, -1, 1), radius, reveal);
+            foreach (var coord in Scan(map, quadrant, new Row(1, -1, 1), radius)) yield return coord;
         }
     }
 
-    private static void Scan(WorldMap map, Quadrant quadrant, Row row, int radius, Action<Vector2i> reveal)
+    private static IEnumerable<Vector2i> Scan(WorldMapView map, Quadrant quadrant, Row row, int radius)
     {
         QuadrantCoord? previousCoord = null;
         foreach (var currentCoord in row.Coords())
@@ -28,7 +27,8 @@ public class FieldOfView
             // swept, so as to be symmetric
             if (BlocksLight(map, quadrant, currentCoord) || IsOriginVisibleFrom(row, currentCoord))
             {
-                reveal(quadrant.ToGlobalCoords(currentCoord));
+
+                yield return quadrant.ToGlobalCoords(currentCoord);
             }
             if (BlocksLight(map, quadrant, previousCoord) && AllowsLight(map, quadrant, currentCoord))
             {
@@ -38,13 +38,13 @@ public class FieldOfView
             {
                 var next = row.Next();
                 next.EndSlope = LeftSlope(currentCoord);
-                Scan(map, quadrant, next, radius, reveal);
+                foreach (var coord in Scan(map, quadrant, next, radius)) yield return coord;
             }
             previousCoord = currentCoord;
         }
         if (AllowsLight(map, quadrant, previousCoord))
         {
-            Scan(map, quadrant, row.Next(), radius, reveal);
+            foreach (var coord in Scan(map, quadrant, row.Next(), radius)) yield return coord;
         }
     }
 
@@ -54,12 +54,12 @@ public class FieldOfView
         return (row * row) + (col * col) <= radius * radius;
     }
 
-    private static bool BlocksLight(WorldMap map, Quadrant quadrant, QuadrantCoord? coord)
+    private static bool BlocksLight(WorldMapView map, Quadrant quadrant, QuadrantCoord? coord)
     {
         return coord is QuadrantCoord c && map[quadrant.ToGlobalCoords(c)].BlocksLight();
     }
 
-    private static bool AllowsLight(WorldMap map, Quadrant quadrant, QuadrantCoord? coord)
+    private static bool AllowsLight(WorldMapView map, Quadrant quadrant, QuadrantCoord? coord)
     {
         return coord is QuadrantCoord c && !map[quadrant.ToGlobalCoords(c)].BlocksLight();
     }
