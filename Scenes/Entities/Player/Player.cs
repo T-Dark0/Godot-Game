@@ -74,12 +74,9 @@ public class Player : Entity
         };
     }
 
-    private async Task<InputResult> MovementHelper(Level level, Vector2i vec, bool run)
+    private async Task<InputResult> MovementHelper(Level level, Vector2i destination, bool run)
     {
-        GD.Print($"MovementHelper: vec:{vec}, run:{run}");
-        var direction = (Direction?)vec;
-
-        var moveResult = await Move(level, direction!.Value, run ? RUN_SPEED : WALK_SPEED);
+        var moveResult = await MoveByOffset(level, destination, run ? RUN_SPEED : WALK_SPEED);
         if (moveResult == MoveResult.Success)
         {
             level.Map.RevealAround(Coords, VISION_RADIUS);
@@ -93,9 +90,10 @@ public class Player : Entity
 
     private async Task<InputResult> HandleSpellcast(Level level)
     {
-        if (Input.IsActionPressed("light_arrow"))
+        if (Input.IsActionJustPressed("light_arrow"))
         {
             var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
+            if (target == Coords) return InputResult.Continue;
             await Projectiles.LightArrow().Fire(level, Coords, target);
             return InputResult.EndTurn;
         }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public readonly struct Vector2i
@@ -16,6 +18,11 @@ public readonly struct Vector2i
     public static Vector2i Right = new Vector2i(1, 0);
     public static Vector2i UpRight = new Vector2i(1, -1);
 
+    public static List<Vector2i> NeighborOffsets = new List<Vector2i>
+    {
+        Up, UpLeft, Left, DownLeft, Down, DownRight, Right, UpRight,
+    };
+
     public Vector2i(int x, int y)
     {
         this.x = x;
@@ -27,6 +34,17 @@ public readonly struct Vector2i
         x = this.x;
         y = this.y;
     }
+
+    public double DistanceTo(Vector2i other)
+    {
+        var dx = x - other.x;
+        var dy = y - other.y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    public static IEnumerable<Vector2i> NeighborsOf(Vector2i coord) => NeighborOffsets.Select(offset => coord + offset);
+    public bool IsNeighborOf(Vector2i other) => (other - this).IsOffset();
+    public bool IsOffset() => (Direction?)this is Direction;
 
     public static implicit operator Vector2i((int, int) tuple) => new Vector2i(tuple.Item1, tuple.Item2);
 

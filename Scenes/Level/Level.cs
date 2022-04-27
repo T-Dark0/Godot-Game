@@ -8,7 +8,7 @@ public class Level : Node2D
 #nullable disable //initialized in _Ready or in Initialize
     public Map Map;
     public Random Rng;
-    private Player _player;
+    public Player Player;
 #nullable enable
     private List<Entity> _entities = new List<Entity>();
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
@@ -24,11 +24,11 @@ public class Level : Node2D
     public void Initialize(Random rng, Player player)
     {
         Rng = rng;
-        _player = player;
+        Player = player;
 
         Map.Initialize(rng);
-        SpawnPlayer(_player);
-        Map.RevealAround(_player.Coords, Player.VISION_RADIUS);
+        SpawnPlayer(Player);
+        Map.RevealAround(Player.Coords, Player.VISION_RADIUS);
     }
 
     public async void GameLoop()

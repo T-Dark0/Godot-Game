@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace GameMap;
@@ -84,6 +85,14 @@ public readonly struct WorldMapView
     {
         get => _map[coords];
     }
+
+    public List<Vector2i> AStar(
+        Vector2i from,
+        Vector2i goal,
+        Func<Vector2i, Vector2i, float> heuristic,
+        Func<Vector2i, IEnumerable<Vector2i>> neighboursOf,
+        Func<Vector2i, Vector2i, float> stepCost
+    ) => _map.AStar(from, goal, heuristic, neighboursOf, stepCost);
 }
 
 public enum Tile
