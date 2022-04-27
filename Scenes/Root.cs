@@ -10,9 +10,8 @@ public class Root : Node2D
     public override void _Ready()
     {
         _level = GetNode<Level>("Level");
-        _player = GetNode<Player>("Player");
 
-        _level.Initialize(new Random(), _player);
-        _level.GameLoop();
+        _level.Initialize(new Random());
+        _level.PlayGame();
     }
 }
