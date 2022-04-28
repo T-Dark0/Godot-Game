@@ -39,7 +39,7 @@ public class Map : Node2D
 
     public bool IsVisible(Vector2i point)
     {
-        return _visibility[point] == VisibilityTile.Empty;
+        return _visibility[point] == VisibilityTile.Visible;
     }
 
     public bool IsPassable(Vector2i point)

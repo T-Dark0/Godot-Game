@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 
@@ -8,8 +11,14 @@ public class Player : Entity
     private const uint RUN_SPEED = 12;
     public const int VISION_RADIUS = 15;
 
+    private static Texture _trajectoryReachable = GD.Load<Texture>("res://Images/TrajectoryReachable.png");
+    private static Texture _trajectoryBlocker = GD.Load<Texture>("res://Images/TrajectoryBlocker.png");
+    private static Texture _trajectoryUnreachable = GD.Load<Texture>("res://Images/TrajectoryUnreachable.png");
+
+
 #nullable disable //Initialized in _Ready()
     private Camera2D _camera;
+    private Timer _timer;
 #nullable enable
 
     [Signal]
@@ -20,6 +29,7 @@ public class Player : Entity
         base._Ready();
         _camera = GetNode<Camera2D>("Camera");
         _camera.MakeCurrent();
+        _timer = GetNode<Timer>("Timer");
     }
 
     public override async Task PlayTurn(Level level)
@@ -97,6 +107,36 @@ public class Player : Entity
             await Projectiles.LightArrow().Fire(level, Coords, target);
             return InputResult.EndTurn;
         }
+        if (Input.IsActionJustPressed("preview_trajectory"))
+        {
+            var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
+            var sprites = new List<Sprite>();
+            var iter = Projectiles.LightArrow()
+                .GetTrajectory(level, Coords, target)
+                .TakeWhile(pair => level.Map.IsVisible(pair.Coord));
+            foreach (var (coord, tile) in iter)
+            {
+                var sprite = new Sprite();
+                sprite.Texture = tile switch
+                {
+                    TrajectoryTile.Reachable => _trajectoryReachable,
+                    TrajectoryTile.Blocker => _trajectoryBlocker,
+                    TrajectoryTile.Unreachable => _trajectoryUnreachable,
+                    _ => throw new ArgumentException(),
+                };
+                sprite.GlobalPosition = level.Map.GlobalPositionOfTile(coord);
+                sprites.Add(sprite);
+                level.AddChild(sprite);
+            }
+            _timer.Start(0.5f);
+            await ToSignal(_timer, "timeout");
+            foreach (var sprite in sprites)
+            {
+                level.RemoveChild(sprite);
+                sprite.QueueFree();
+            }
+        }
+
         return InputResult.Continue;
     }
 

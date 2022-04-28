@@ -5,7 +5,7 @@ using System.Linq;
 // NOTE: some methods in this class are restricted to T: struct because C# behaves really awkwardly otherwise
 // Specifically, it will make Random return a defaulted T instead of a null one
 // and it will make SelectWhere return U? even though the declared return type is U
-public static class RandomFromEnumerableExtension
+public static class LinqExtensions
 {
     // Reservoir sampling, specialized for the case in which we only want to extract a single element.
     // Adapted from https://en.wikipedia.org/wiki/Reservoir_sampling
@@ -52,5 +52,16 @@ public static class RandomFromEnumerableExtension
     public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> source)
     {
         return source.Select((item, index) => (item, index));
+    }
+
+    public static IEnumerable<T> TakeWhileInclusive<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+    {
+        var stop = false;
+        foreach (var elem in source)
+        {
+            if (stop) yield break;
+            stop = !predicate(elem);
+            yield return elem;
+        }
     }
 }

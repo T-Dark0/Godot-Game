@@ -6,7 +6,6 @@
 [ext_resource path="res://Scenes/Level/Map/WorldMap.cs" type="Script" id=4]
 [ext_resource path="res://Scenes/Level/Map/Map.cs" type="Script" id=5]
 
-
 [sub_resource type="TileSet" id=1]
 0/name = "Wall"
 0/texture = ExtResource( 2 )
@@ -66,7 +65,7 @@
 3/z_index = 0
 
 [sub_resource type="TileSet" id=2]
-0/name = "Black"
+0/name = "Unknown"
 0/texture = ExtResource( 3 )
 0/tex_offset = Vector2( 0, 0 )
 0/modulate = Color( 1, 1, 1, 1 )
@@ -94,6 +93,20 @@
 1/shape_one_way_margin = 0.0
 1/shapes = [  ]
 1/z_index = 0
+2/name = "Visible"
+2/texture = ExtResource( 3 )
+2/tex_offset = Vector2( 0, 0 )
+2/modulate = Color( 1, 1, 1, 1 )
+2/region = Rect2( 34, 0, 16, 16 )
+2/tile_mode = 0
+2/occluder_offset = Vector2( 0, 0 )
+2/navigation_offset = Vector2( 0, 0 )
+2/shape_offset = Vector2( 0, 0 )
+2/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+2/shape_one_way = false
+2/shape_one_way_margin = 0.0
+2/shapes = [  ]
+2/z_index = 0
 
 [node name="Map" type="Node2D"]
 script = ExtResource( 5 )
@@ -105,7 +118,7 @@ format = 1
 script = ExtResource( 4 )
 
 [node name="Visibility" type="TileMap" parent="."]
-z_index = 10
+z_index = 1
 tile_set = SubResource( 2 )
 cell_size = Vector2( 16, 16 )
 format = 1

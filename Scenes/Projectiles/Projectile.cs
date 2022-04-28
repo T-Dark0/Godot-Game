@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GameMap;
@@ -25,23 +26,50 @@ public class Projectile : Node2D
 
     public async Task<Vector2i> Fire(Level level, Vector2i from, Vector2i to)
     {
-        var actualTarget = LineOfSight
-            .Towards(from, to)
-            .TakeWhile(coord => !level.Map.World[coord].BlocksProjectiles())
-            .Take(MaxRange)
-            .Last();
+        var actualTo = GetTrajectory(level, from, to)
+        .TakeWhileInclusive(pair => pair.Tile == TrajectoryTile.Reachable)
+        .Last()
+        .Coord;
 
         level.AddChild(this);
-        await this.Animate(level, from, actualTarget);
+        await Animate(level, from, actualTo);
         level.RemoveChild(this);
 
         Entity target;
-        if (level.EntityPositions.TryGetValue(to, out target))
+        if (level.EntityPositions.TryGetValue(actualTo, out target))
         {
             target.Health.TakeDamage(Damage);
         }
         QueueFree();
-        return actualTarget;
+        return actualTo;
+    }
+
+    public IEnumerable<(Vector2i Coord, TrajectoryTile Tile)> GetTrajectory(Level level, Vector2i from, Vector2i to)
+    {
+        return GetInfiniteTrajectory(level, from, to).Take(MaxRange);
+    }
+
+    private IEnumerable<(Vector2i Coord, TrajectoryTile Tile)> GetInfiniteTrajectory(Level level, Vector2i from, Vector2i to)
+    {
+        var tile = TrajectoryTile.Reachable;
+        var los = LineOfSight.Towards(from, to).GetEnumerator();
+        los.MoveNext();
+        yield return (los.Current, tile);
+        while (los.MoveNext())
+        {
+            var coord = los.Current;
+            if (tile == TrajectoryTile.Reachable
+                && level.Map.World[coord].BlocksProjectiles() || level.EntityPositions.ContainsKey(coord)
+            )
+            {
+                tile = TrajectoryTile.Blocker;
+            }
+            else if (tile == TrajectoryTile.Blocker)
+            {
+                tile = TrajectoryTile.Unreachable;
+            }
+            yield return (coord, tile);
+        }
     }
 
     private async Task Animate(Level level, Vector2i from, Vector2i to)
@@ -59,7 +87,9 @@ public class Projectile : Node2D
     }
 }
 
-public interface ProjectileFactory
+public enum TrajectoryTile
 {
-    public Projectile Create();
+    Reachable,
+    Blocker,
+    Unreachable,
 }

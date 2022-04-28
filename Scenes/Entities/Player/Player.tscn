@@ -18,3 +18,5 @@ Current = 100
 Max = 100
 
 [node name="Tween" type="Tween" parent="."]
+
+[node name="Timer" type="Timer" parent="."]

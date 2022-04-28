@@ -14,7 +14,7 @@ public class VisibilityMap : TileMap
     {
         foreach (var coord in map.TileCoords())
         {
-            this[coord] = VisibilityTile.Black;
+            this[coord] = VisibilityTile.Unknown;
         }
     }
 
@@ -23,15 +23,15 @@ public class VisibilityMap : TileMap
         //Apply "revealed but not currently visible" fog of war to all tiles
         foreach (var coord in map.TileCoords())
         {
-            if (this[coord] == VisibilityTile.Empty)
+            if (this[coord] == VisibilityTile.Visible)
             {
-                this[coord] = VisibilityTile.Fogged;
+                this[coord] = VisibilityTile.Known;
             }
         }
         //Then reveal the tiles that are actually visible
         foreach (var coord in FieldOfView.OfViewpoint(new WorldMapView(map), viewpoint, radius))
         {
-            this[coord] = VisibilityTile.Empty;
+            this[coord] = VisibilityTile.Visible;
         }
     }
 }
@@ -39,6 +39,7 @@ public class VisibilityMap : TileMap
 public enum VisibilityTile
 {
     Empty = -1,
-    Black = 0,
-    Fogged = 1,
+    Unknown = 0,
+    Known = 1,
+    Visible = 2,
 }
