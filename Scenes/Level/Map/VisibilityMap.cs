@@ -18,7 +18,7 @@ public class VisibilityMap : TileMap
         }
     }
 
-    public void RevealAround(WorldMap map, Vector2i viewpoint, int radius)
+    public void RevealAround(WorldMapView map, Vector2i viewpoint, int radius)
     {
         //Apply "revealed but not currently visible" fog of war to all tiles
         foreach (var coord in map.TileCoords())
@@ -29,7 +29,7 @@ public class VisibilityMap : TileMap
             }
         }
         //Then reveal the tiles that are actually visible
-        foreach (var coord in FieldOfView.OfViewpoint(new WorldMapView(map), viewpoint, radius))
+        foreach (var coord in FieldOfView.OfViewpoint(map, viewpoint, radius))
         {
             this[coord] = VisibilityTile.Visible;
         }

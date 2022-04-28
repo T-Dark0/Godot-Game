@@ -34,7 +34,7 @@ public class Map : Node2D
 
     public void RevealAround(Vector2i viewpoint, int radius)
     {
-        _visibility.RevealAround(_world, viewpoint, radius);
+        _visibility.RevealAround(World, viewpoint, radius);
     }
 
     public bool IsVisible(Vector2i point)
