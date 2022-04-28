@@ -27,7 +27,7 @@ public abstract class Entity : Node2D
         Id = id;
     }
 
-    public async Task<MoveResult> MoveByOffset(Level level, Vector2i offset, uint speed)
+    public async Task<MoveResult> MoveByOffset(Level level, Vector2i offset, uint speed, bool animate = true)
     {
         if (!offset.IsOffset()) return MoveResult.Failure;
         var destination = Coords + offset;
@@ -38,7 +38,7 @@ public abstract class Entity : Node2D
         level.EntityPositions.Add(Coords, this);
         var targetPosition = level.Map.GlobalPositionOfTile(Coords);
 
-        if (level.Map.IsVisible(destination))
+        if (animate)
         {
             var time = 1.0f / speed;
             Tween.InterpolateProperty(this, "global_position", null, targetPosition, time);

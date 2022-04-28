@@ -15,7 +15,7 @@ public class EnemySkull : Entity
             {
                 var step = LineOfSight.Between(Coords, level.Player.Coords).ElementAt(1);
                 var offset = step - Coords;
-                await MoveByOffset(level, offset, MOVE_SPEED);
+                await MoveByOffset(level, offset, MOVE_SPEED, animate: true);
             }
             else
             {
@@ -25,7 +25,7 @@ public class EnemySkull : Entity
         else
         {
             var dir = Vector2i.NeighborOffsets[level.Rng.Next(8)];
-            await MoveByOffset(level, dir, MOVE_SPEED);
+            await MoveByOffset(level, dir, MOVE_SPEED, animate: false);
         }
     }
 }
