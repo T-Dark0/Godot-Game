@@ -43,7 +43,7 @@ public class Level : Node2D
 
     public async Task GameLoop()
     {
-        while (true) //TODO: game end condition
+        while (true)
         {
             _turnCounter++;
             GD.Print("turn ", _turnCounter);

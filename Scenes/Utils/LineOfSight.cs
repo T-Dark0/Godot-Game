@@ -3,42 +3,46 @@ using System.Collections.Generic;
 
 public class LineOfSight
 {
+    public static IEnumerable<Vector2i> Between(Vector2i from, Vector2i to) => BetweenInner(from, to, infinite: false);
+    public static IEnumerable<Vector2i> Towards(Vector2i from, Vector2i to) => BetweenInner(from, to, infinite: true);
+
     //adapted from <https://stackoverflow.com/a/11683720>
-    public static IEnumerable<Vector2i> Between(Vector2i from, Vector2i to)
+    private static IEnumerable<Vector2i> BetweenInner(Vector2i from, Vector2i to, bool infinite)
     {
         var (x, y) = from;
-        var (x2, y2) = to;
 
-        int w = x2 - x;
-        int h = y2 - y;
-        int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
-        if (w < 0) dx1 = -1; else if (w > 0) dx1 = 1;
-        if (h < 0) dy1 = -1; else if (h > 0) dy1 = 1;
-        if (w < 0) dx2 = -1; else if (w > 0) dx2 = 1;
-        int longest = Math.Abs(w);
-        int shortest = Math.Abs(h);
-        if (!(longest > shortest))
+        var dx = to.x - from.x;
+        var dy = to.y - from.y;
+
+        var diagonalDx = Math.Sign(dx);
+        var diagonalDy = Math.Sign(dy);
+        var alignedDx = diagonalDx;
+        var alignedDy = 0;
+        var longest = Math.Abs(dx);
+        var shortest = Math.Abs(dy);
+        if (shortest > longest)
         {
-            longest = Math.Abs(h);
-            shortest = Math.Abs(w);
-            if (h < 0) dy2 = -1; else if (h > 0) dy2 = 1;
-            dx2 = 0;
+            (longest, shortest) = (shortest, longest);
+            alignedDy = diagonalDy;
+            alignedDx = 0;
         }
-        int numerator = longest >> 1;
-        for (int i = 0; i <= longest; i++)
+
+        var error = longest / 2;
+        var steps = infinite ? int.MaxValue : longest;
+        for (int i = 0; i <= steps; i++)
         {
             yield return (x, y);
-            numerator += shortest;
-            if (!(numerator < longest))
+            error += shortest;
+            if (error < longest)
             {
-                numerator -= longest;
-                x += dx1;
-                y += dy1;
+                x += alignedDx;
+                y += alignedDy;
             }
             else
             {
-                x += dx2;
-                y += dy2;
+                error -= longest;
+                x += diagonalDx;
+                y += diagonalDy;
             }
         }
     }

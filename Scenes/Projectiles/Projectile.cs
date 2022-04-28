@@ -9,6 +9,8 @@ public class Projectile : Node2D
     public float Speed;
     [Export]
     public uint Damage;
+    [Export(PropertyHint.Range, "0,99")]
+    public int MaxRange;
 
 #nullable disable //Initialized in _Ready
     public Sprite Sprite;
@@ -24,8 +26,9 @@ public class Projectile : Node2D
     public async Task<Vector2i> Fire(Level level, Vector2i from, Vector2i to)
     {
         var actualTarget = LineOfSight
-            .Between(from, to)
+            .Towards(from, to)
             .TakeWhile(coord => !level.Map.World[coord].BlocksProjectiles())
+            .Take(MaxRange)
             .Last();
 
         level.AddChild(this);

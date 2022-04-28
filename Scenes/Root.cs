@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Godot;
 
 public class Root : Node2D
@@ -11,7 +12,7 @@ public class Root : Node2D
     {
         _level = GetNode<Level>("Level");
 
-        _level.Initialize(new Random());
+        _level.Initialize(new Random(6));
         _level.PlayGame();
     }
 }
