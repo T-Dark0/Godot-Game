@@ -19,7 +19,7 @@ public class EnemySkull : Entity
             }
             else
             {
-                await Projectiles.CursedBolt().Fire(level, Coords, level.Player.Coords);
+                await Projectiles.SpawnCursedBolt().Fire(level, Coords, level.Player.Coords);
             }
         }
         else

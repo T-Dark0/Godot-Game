@@ -104,14 +104,14 @@ public class Player : Entity
         {
             var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
             if (target == Coords) return InputResult.Continue;
-            await Projectiles.LightArrow().Fire(level, Coords, target);
+            await Projectiles.SpawnLightArrow().Fire(level, Coords, target);
             return InputResult.EndTurn;
         }
         if (Input.IsActionJustPressed("preview_trajectory"))
         {
             var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
             var sprites = new List<Sprite>();
-            var iter = Projectiles.LightArrow()
+            var iter = Projectiles.LightArrow.Attributes
                 .GetTrajectory(level, Coords, target)
                 .TakeWhile(pair => level.Map.IsVisible(pair.Coord));
             foreach (var (coord, tile) in iter)

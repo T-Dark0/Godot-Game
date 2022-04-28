@@ -51,8 +51,6 @@ public enum Tile
     Empty = -1,
     Wall = 0,
     Floor = 1,
-    DebugRed = 2,
-    DebugGreen = 3,
 }
 
 public static class TileMethods
