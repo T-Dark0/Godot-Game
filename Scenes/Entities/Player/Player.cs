@@ -51,7 +51,6 @@ public class Player : Entity
     public override void _UnhandledInput(InputEvent @event)
     {
         EmitSignal(nameof(InputReceived));
-        HandleZoom(@event);
     }
 
     private static readonly (string, Vector2i)[] _axisAlignedActions = {
@@ -146,18 +145,6 @@ public class Player : Entity
         }
 
         return InputResult.Continue;
-    }
-
-    private void HandleZoom(InputEvent @event)
-    {
-        if (@event.IsActionPressed("zoom_in"))
-        {
-            _camera.Zoom /= ZOOM_STEP;
-        }
-        else if (@event.IsActionPressed("zoom_out"))
-        {
-            _camera.Zoom *= ZOOM_STEP;
-        }
     }
 }
 

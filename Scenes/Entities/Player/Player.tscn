@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scenes/Entities/Player/Player.cs" type="Script" id=1]
 [ext_resource path="res://Images/Player.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Entities/Health.cs" type="Script" id=3]
 [ext_resource path="res://Scenes/UI/HealthBar.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Entities/Player/Camera.cs" type="Script" id=5]
 
 [node name="Player" type="Node2D"]
 scale = Vector2( 1.5, 1.5 )
@@ -13,6 +14,10 @@ script = ExtResource( 1 )
 texture = ExtResource( 2 )
 
 [node name="Camera" type="Camera2D" parent="."]
+script = ExtResource( 5 )
+MinZoom = 0.1
+MaxZoom = 10.0
+ZoomStep = 1.2
 
 [node name="Health" type="Node" parent="."]
 script = ExtResource( 3 )
