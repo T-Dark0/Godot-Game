@@ -11,11 +11,13 @@ public class HealthBar : Control
 
 #nullable disable //Initialized in _Ready()
     private TextureProgress _bar;
+    private Label _label;
 #nullable enable
 
     public override void _Ready()
     {
         _bar = GetNode<TextureProgress>("Bar");
+        _label = GetNode<Label>("Label");
         Visible = false;
     }
 
@@ -23,12 +25,18 @@ public class HealthBar : Control
     {
         var percent = (double)health.Current / (double)health.Max;
 
-        if (percent == 1) Visible = false;
-        else Visible = true;
+        if (percent == 1)
+        {
+            Visible = false;
+            return;
+        }
+        _label.Text = $"{health.Current}/{health.Max}";
 
         _bar.TextureProgress_ = _barGreen;
         if (percent < YELLOW_THRESHOLD) _bar.TextureProgress_ = _barYellow;
         if (percent < RED_THRESHOLD) _bar.TextureProgress_ = _barRed;
         _bar.Value = percent * 100;
+
+        Visible = true;
     }
 }

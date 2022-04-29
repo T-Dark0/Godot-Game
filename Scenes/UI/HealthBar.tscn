@@ -1,18 +1,32 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://Images/HealthBarFrame.png" type="Texture" id=1]
-[ext_resource path="res://Images/HealthBarGreen.png" type="Texture" id=2]
+[ext_resource path="res://Images/HealthBarFrame.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/UI/HealthBar.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/UI/Fonts/Kenney Mini Square.ttf" type="DynamicFontData" id=4]
+
+[sub_resource type="DynamicFont" id=1]
+size = 8
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 4 )
 
 [node name="Control" type="Control"]
 margin_left = -8.0
 margin_top = -20.0
 margin_right = -8.0
 margin_bottom = -20.0
+rect_scale = Vector2( 0.5, 0.5 )
 script = ExtResource( 3 )
 
 [node name="Bar" type="TextureProgress" parent="."]
+margin_right = 16.0
+margin_bottom = 8.0
 mouse_filter = 2
 value = 100.0
-texture_under = ExtResource( 1 )
-texture_progress = ExtResource( 2 )
+texture_under = ExtResource( 2 )
+
+[node name="Label" type="Label" parent="."]
+margin_left = 4.0
+margin_top = -7.0
+rect_scale = Vector2( 0.75, 0.75 )
+custom_fonts/font = SubResource( 1 )
