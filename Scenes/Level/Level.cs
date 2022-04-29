@@ -10,10 +10,10 @@ public class Level : Node2D
     public Map Map;
     public Random Rng;
     public Player Player;
+    private Label _turnLabel;
 #nullable enable
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
     public List<Enemy> Enemies = new List<Enemy>();
-    private ulong _turnCounter = 0;
     private bool _isPlayerDead = false;
 
     private const int SPAWN_INTERVAL = 36;
@@ -22,6 +22,7 @@ public class Level : Node2D
     {
         Map = GetNode<Map>("Map");
         Player = GetNode<Player>("Player");
+        _turnLabel = GetNode<Label>("CanvasLayer/TurnLabel");
     }
 
     public void Initialize(Random rng)
@@ -43,10 +44,11 @@ public class Level : Node2D
 
     public async Task GameLoop()
     {
+        var turnCounter = 0;
         while (true)
         {
-            _turnCounter++;
-            GD.Print("turn ", _turnCounter);
+            turnCounter++;
+            _turnLabel.Text = $"Turn: {turnCounter}";
 
             await Player.PlayTurn(this);
             for (int i = 0; i < Enemies.Count; i++)
@@ -54,7 +56,7 @@ public class Level : Node2D
                 await Enemies[i].PlayTurn(this);
                 if (_isPlayerDead) return;
             }
-            if (_turnCounter % SPAWN_INTERVAL == 0)
+            if (turnCounter % SPAWN_INTERVAL == 0)
             {
                 SpawnRandomEnemy();
             }
