@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scenes/Entities/Player/Player.cs" type="Script" id=1]
 [ext_resource path="res://Images/Player.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Entities/Health.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/UI/HealthBar.tscn" type="PackedScene" id=4]
 
 [node name="Player" type="Node2D"]
 script = ExtResource( 1 )
@@ -20,3 +21,5 @@ Max = 100
 [node name="Tween" type="Tween" parent="."]
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="HealthBar" parent="." instance=ExtResource( 4 )]

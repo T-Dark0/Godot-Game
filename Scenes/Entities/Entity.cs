@@ -8,6 +8,7 @@ public abstract class Entity : Node2D
     public Health Health;
     public Sprite Sprite;
     public Tween Tween;
+    private HealthBar _healthBar;
 #nullable enable
 
     [Signal]
@@ -20,6 +21,8 @@ public abstract class Entity : Node2D
         Health = GetNode<Health>("Health");
         Sprite = GetNode<Sprite>("Sprite");
         Tween = GetNode<Tween>("Tween");
+        _healthBar = GetNode<HealthBar>("HealthBar");
+        Health.Connect(nameof(Health.Changed), _healthBar, nameof(HealthBar.OnHealthChange));
     }
 
     public void Initialize(Level level, Vector2i coords)

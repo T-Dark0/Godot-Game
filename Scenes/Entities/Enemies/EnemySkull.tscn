@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scenes/Entities/Enemies/EnemySkull.cs" type="Script" id=1]
 [ext_resource path="res://Images/Skull.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Entities/Health.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/UI/HealthBar.tscn" type="PackedScene" id=4]
 
 [node name="EnemySkull" type="Node2D"]
 scale = Vector2( 1.5, 1.5 )
@@ -17,3 +18,5 @@ Current = 40
 Max = 40
 
 [node name="Tween" type="Tween" parent="."]
+
+[node name="HealthBar" parent="." instance=ExtResource( 4 )]

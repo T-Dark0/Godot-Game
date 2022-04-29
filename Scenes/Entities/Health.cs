@@ -8,6 +8,9 @@ public class Health : Node
     public uint Max;
 
     [Signal]
+    public delegate void Changed(Health self);
+
+    [Signal]
     public delegate void Died(Health self);
 
     public void TakeDamage(uint amount)
@@ -21,5 +24,6 @@ public class Health : Node
         {
             Current -= amount;
         }
+        EmitSignal(nameof(Changed), this);
     }
 }
