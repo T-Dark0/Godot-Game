@@ -83,6 +83,7 @@ public class Player : Entity
             }
         }
 
+        if (vec == Vector2i.Zero) return InputResult.Continue;
         return (axisAlignedPressed, diagonalPressed) switch
         {
             (1, 0) or (2, 0) or (0, 1) => await MovementHelper(level, vec, Input.IsActionPressed("move_run")),
