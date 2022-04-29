@@ -1,0 +1,7 @@
+Code:
+	FieldOfView.cs: CC0 1.0 Universal (https://github.com/370417/symmetric-shadowcasting/blob/master/LICENSE.txt, adapted from https://www.albertford.com/shadowcasting/, see bottom of page for link to license)
+
+	LineOfSight.cs: CC BY-SA 3.0 (adapted from https://stackoverflow.com/a/11683720, Stackoverflow content licensing: https://stackoverflow.com/help/licensing)
+
+Fonts: 
+	Kenney Mini Square.ttf, CC0 1.0 Universal (see https://www.kenney.nl/assets/kenney-fonts)

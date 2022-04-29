@@ -22,7 +22,6 @@ public class HealthBar : Control
     public void OnHealthChange(Health health)
     {
         var percent = (double)health.Current / (double)health.Max;
-        GD.Print($"current: {health.Current}, max: {health.Max}, percent: {percent}, oldValue: {_bar.Value}");
 
         if (percent == 1) Visible = false;
         else Visible = true;

@@ -3,10 +3,6 @@ using System.Text;
 
 namespace WorldGenerator;
 
-/// <summary>
-/// A variant of a Union-Find data structure, as described on
-/// https://en.wikipedia.org/wiki/Disjoint-set_data_structure
-/// </summary>
 public class UnionFindGraph<N, E>
 {
     private Graph<N, E> _graph;

@@ -8,7 +8,6 @@ using System.Linq;
 public static class LinqExtensions
 {
     // Reservoir sampling, specialized for the case in which we only want to extract a single element.
-    // Adapted from https://en.wikipedia.org/wiki/Reservoir_sampling
     public static T? Random<T>(this IEnumerable<T> iter, Random rng) where T : struct
     {
         var consumed = 0;
