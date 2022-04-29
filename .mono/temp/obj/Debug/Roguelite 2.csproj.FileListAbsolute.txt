@@ -1,9 +1,0 @@
-C:\Giochi\Godot\Roguelite2\.mono\temp\bin\Debug\Roguelite 2.dll
-C:\Giochi\Godot\Roguelite2\.mono\temp\bin\Debug\Roguelite 2.pdb
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.csproj.AssemblyReference.cache
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.GeneratedMSBuildEditorConfig.editorconfig
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.AssemblyInfoInputs.cache
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.AssemblyInfo.cs
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.csproj.CoreCompileInputs.cache
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.dll
-C:\Giochi\Godot\Roguelite2\.mono\temp\obj\Debug\Roguelite 2.pdb
