@@ -1,11 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-public class EnemySkull : Entity
+public class EnemySkull : Enemy
 {
     private const uint MOVE_SPEED = 5;
-
-    private bool _sawPlayerLastTurn = false;
 
     public override async Task PlayTurn(Level level)
     {

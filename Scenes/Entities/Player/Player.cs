@@ -32,6 +32,12 @@ public class Player : Entity
         _timer = GetNode<Timer>("Timer");
     }
 
+    public new void Initialize(Level level, Vector2i coords)
+    {
+        base.Initialize(level, coords);
+        Visible = true;
+    }
+
     public override async Task PlayTurn(Level level)
     {
         while (true)
@@ -90,6 +96,7 @@ public class Player : Entity
         if (moveResult == MoveResult.Success)
         {
             level.Map.RevealAround(Coords, VISION_RADIUS);
+            EmitSignal(nameof(Moved), this);
             return InputResult.EndTurn;
         }
         else

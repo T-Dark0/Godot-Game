@@ -12,7 +12,7 @@ public class Level : Node2D
     public Player Player;
 #nullable enable
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
-    private List<Entity> _entities = new List<Entity>();
+    public List<Enemy> Enemies = new List<Enemy>();
     private ulong _turnCounter = 0;
     private bool _isPlayerDead = false;
 
@@ -48,9 +48,10 @@ public class Level : Node2D
             _turnCounter++;
             GD.Print("turn ", _turnCounter);
 
-            for (int i = 0; i < _entities.Count; i++)
+            await Player.PlayTurn(this);
+            for (int i = 0; i < Enemies.Count; i++)
             {
-                await _entities[i].PlayTurn(this);
+                await Enemies[i].PlayTurn(this);
                 if (_isPlayerDead) return;
             }
             if (_turnCounter % SPAWN_INTERVAL == 0)
@@ -68,42 +69,59 @@ public class Level : Node2D
     private void SpawnPlayer(Player player)
     {
         var tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
-        player.Initialize(this, tile, _entities.Count);
-        player.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
+
+        player.Initialize(this, tile);
         player.Health.Connect(nameof(Health.Died), this, nameof(OnPlayerDeath));
-        _entities.Add(player);
+        player.Connect(nameof(Entity.Moved), this, nameof(OnPlayerMove));
+
         EntityPositions.Add(player.Coords, player);
     }
 
     private void SpawnRandomEnemy()
     {
-        var enemy = Enemies.List[Rng.Next(Enemies.List.Length)].Instance<Entity>();
+        var enemy = global::Enemies.List[Rng.Next(global::Enemies.List.Length)].Instance<Enemy>();
         var tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
         if (EntityPositions.ContainsKey(tile)) return; //don't spawn enemies into other things
         AddChild(enemy);
-        enemy.Initialize(this, tile, _entities.Count);
-        enemy.Health.Connect(nameof(Health.Died), this, nameof(OnEntityDeath));
-        _entities.Add(enemy);
+
+        enemy.Initialize(this, tile, Enemies.Count);
+        enemy.Health.Connect(nameof(Health.Died), this, nameof(OnEnemyDeath));
+        enemy.Connect(nameof(Entity.Moved), this, nameof(OnEnemyMove));
+
+        Enemies.Add(enemy);
         EntityPositions.Add(enemy.Coords, enemy);
     }
 
-    private void OnEntityDeath(Health health)
+    private void OnEnemyDeath(Health health)
     {
-        var entity = (Entity)health.Owner;
+        var enemy = (Enemy)health.Owner;
 
-        var last = _entities.Count - 1;
-        var lastEntity = _entities[last];
-        lastEntity.Id = entity.Id;
-        _entities[entity.Id] = lastEntity;
-        _entities.RemoveAt(last);
-        EntityPositions.Remove(entity.Coords);
+        var last = Enemies.Count - 1;
+        var lastEntity = Enemies[last];
+        lastEntity.Id = enemy.Id;
+        Enemies[enemy.Id] = lastEntity;
+        Enemies.RemoveAt(last);
+        EntityPositions.Remove(enemy.Coords);
 
-        RemoveChild(entity);
-        entity.QueueFree();
+        RemoveChild(enemy);
+        enemy.QueueFree();
     }
 
     private void OnPlayerDeath(Health _)
     {
         _isPlayerDead = true;
+    }
+
+    private void OnEnemyMove(Enemy enemy)
+    {
+        enemy.Visible = Map.IsVisible(enemy.Coords);
+    }
+
+    private void OnPlayerMove(Player player)
+    {
+        foreach (var enemy in Enemies)
+        {
+            enemy.Visible = Map.IsVisible(enemy.Coords);
+        }
     }
 }

@@ -34,7 +34,19 @@ public class Map : Node2D
 
     public void RevealAround(Vector2i viewpoint, int radius)
     {
-        _visibility.RevealAround(World, viewpoint, radius);
+        //Apply "revealed but not currently visible" fog of war to all tiles
+        foreach (var coord in _world.TileCoords())
+        {
+            if (_visibility[coord] == VisibilityTile.Visible)
+            {
+                _visibility[coord] = VisibilityTile.Known;
+            }
+        }
+        //Then reveal the tiles that are actually visible
+        foreach (var coord in FieldOfView.OfViewpoint(new WorldMapView(_world), viewpoint, radius))
+        {
+            _visibility[coord] = VisibilityTile.Visible;
+        }
     }
 
     public bool IsVisible(Vector2i point)

@@ -8,8 +8,10 @@ public abstract class Entity : Node2D
     public Health Health;
     public Sprite Sprite;
     public Tween Tween;
-    public int Id;
 #nullable enable
+
+    [Signal]
+    public delegate void Moved(Entity self);
 
     public Vector2i Coords { get; private set; }
 
@@ -20,16 +22,16 @@ public abstract class Entity : Node2D
         Tween = GetNode<Tween>("Tween");
     }
 
-    public void Initialize(Level level, Vector2i coords, int id)
+    public void Initialize(Level level, Vector2i coords)
     {
+        Visible = false;
         Coords = coords;
         GlobalPosition = level.Map.GlobalPositionOfTile(coords);
-        Id = id;
     }
 
     public async Task<MoveResult> MoveByOffset(Level level, Vector2i offset, uint speed, bool animate = true)
     {
-        if (!offset.IsOffset()) return MoveResult.Failure;
+        if (!offset.IsOffset()) throw new ArgumentException();
         var destination = Coords + offset;
         if (!level.IsPassable(destination)) return MoveResult.Failure;
 
