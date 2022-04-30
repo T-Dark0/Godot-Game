@@ -11,6 +11,7 @@ public class Level : Node2D
     public Random Rng;
     public Player Player;
     private Label _turnLabel;
+    private DeathScreen _deathScreen;
 #nullable enable
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
     public List<Enemy> Enemies = new List<Enemy>();
@@ -22,7 +23,8 @@ public class Level : Node2D
     {
         Map = GetNode<Map>("Map");
         Player = GetNode<Player>("Player");
-        _turnLabel = GetNode<Label>("CanvasLayer/TurnLabel");
+        _turnLabel = GetNode<Label>("TurnLabel/Label");
+        _deathScreen = GetNode<DeathScreen>("DeathScreen");
     }
 
     public void Initialize(Random rng)
@@ -37,9 +39,7 @@ public class Level : Node2D
     public async void PlayGame()
     {
         await GameLoop();
-        //TODO: Make the game over screen actually exist
-        GD.Print("Game over!");
-        GD.Print("Thank you for playing!");
+        await _deathScreen.FadeIn();
     }
 
     public async Task GameLoop()
