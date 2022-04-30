@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using GodotArray = Godot.Collections.Array;
 
@@ -8,6 +9,7 @@ public class MainMenu : CanvasLayer
     private VBoxContainer _buttons;
     private int _cursorButtonIndex;
 #nullable enable
+    private static Level _level = GD.Load<PackedScene>("res://Scenes/Level/Level.tscn").Instance<Level>();
 
     public override void _Ready()
     {
@@ -20,21 +22,41 @@ public class MainMenu : CanvasLayer
             button.Connect("focus_entered", this, nameof(MoveCursorToButton), new GodotArray(button));
             button.Connect("mouse_entered", this, nameof(MoveCursorToButton), new GodotArray(button));
         }
+        OnLoad();
+    }
 
+    private void OnLoad()
+    {
         _buttons.GetChild<Button>(0).GrabFocus();
     }
 
-    private void OnNewGameButtonUp()
+    private async void OnNewGameButtonUp()
     {
-    }
+        var root = GetNode("/root");
+        root.RemoveChild(this);
 
-    private void OnSettingsButtonUp()
-    {
+        root.AddChild(_level);
+        _level.Initialize(new Random());
+        await _level.PlayGame();
+
+        root.RemoveChild(_level);
+        root.AddChild(this);
+        OnLoad();
     }
 
     private void OnQuitButtonUp()
     {
         GetTree().Notification(MainLoop.NotificationWmQuitRequest);
+    }
+
+    public override void _Notification(int notif)
+    {
+        switch (notif)
+        {
+            case MainLoop.NotificationWmQuitRequest:
+                _level.QueueFree();
+                break;
+        }
     }
 
     private void MoveCursorToButton(Button button)

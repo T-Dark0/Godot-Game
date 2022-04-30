@@ -54,6 +54,7 @@ public class Player : Entity
     public new void Initialize(Level level, Vector2i coords)
     {
         base.Initialize(level, coords);
+        Health.Set(100);
         Visible = true;
     }
 
