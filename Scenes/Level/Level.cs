@@ -31,7 +31,7 @@ public class Level : Node2D
 
         Map.Initialize(rng);
         SpawnPlayer(Player);
-        Map.RevealAround(Player.Coords, Player.VISION_RADIUS);
+        Map.RevealAround(Player.Coords, Player.VisionRadius);
     }
 
     public async void PlayGame()

@@ -10,7 +10,6 @@ public class Camera : Camera2D
     [Export]
     public float ZoomStep { get; private set; }
 
-
     public override void _UnhandledInput(InputEvent @event)
     {
         if (@event.IsActionPressed("zoom_in"))

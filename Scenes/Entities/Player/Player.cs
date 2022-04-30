@@ -6,20 +6,34 @@ using Godot;
 
 public class Player : Entity
 {
-    private const float ZOOM_STEP = 1.2f;
-    private const uint WALK_SPEED = 5;
-    private const uint RUN_SPEED = 12;
-    public const int VISION_RADIUS = 15;
+    [Export]
+    public uint WalkSpeed { get; private set; }
+    [Export]
+    public uint RunSpeed { get; private set; }
+    [Export]
+    public uint CameraWalkSpeed { get; private set; }
+    [Export]
+    public uint CameraRunSpeed { get; private set; }
+    [Export]
+    public int VisionRadius { get; private set; }
 
     private static Texture _trajectoryReachable = GD.Load<Texture>("res://Images/TrajectoryReachable.png");
     private static Texture _trajectoryBlocker = GD.Load<Texture>("res://Images/TrajectoryBlocker.png");
     private static Texture _trajectoryUnreachable = GD.Load<Texture>("res://Images/TrajectoryUnreachable.png");
 
+    private static readonly (string, Vector2i)[] _axisAlignedActions = {
+        ("move_up", Vector2i.Up), ("move_left", Vector2i.Left), ("move_down", Vector2i.Down), ("move_right", Vector2i.Right)
+    };
+    private static readonly (string, Vector2i)[] _diagonalActions = {
+        ("move_up_left", Vector2i.UpLeft), ("move_down_left", Vector2i.DownLeft),
+        ("move_down_right", Vector2i.DownRight), ("move_up_right", Vector2i.UpRight),
+    };
 
 #nullable disable //Initialized in _Ready()
     private Camera2D _camera;
     private Timer _timer;
 #nullable enable
+    private ToMove _toMove = ToMove.Player;
 
     [Signal]
     private delegate void InputReceived();
@@ -32,6 +46,11 @@ public class Player : Entity
         _timer = GetNode<Timer>("Timer");
     }
 
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        EmitSignal(nameof(InputReceived));
+    }
+
     public new void Initialize(Level level, Vector2i coords)
     {
         base.Initialize(level, coords);
@@ -42,25 +61,39 @@ public class Player : Entity
     {
         while (true)
         {
-            if (await HandleMovement(level) == InputResult.EndTurn) break;
-            if (await HandleSpellcast(level) == InputResult.EndTurn) break;
+            var result = await HandleMovement(level);
+            if (result == HandlerResult.EndTurn) break;
+            else if (result == HandlerResult.Restart) continue;
+
+            result = await HandleSpellcast(level);
+            if (result == HandlerResult.EndTurn) break;
+            else if (result == HandlerResult.Restart) continue;
+
             await ToSignal(this, nameof(InputReceived));
         }
     }
 
-    public override void _UnhandledInput(InputEvent @event)
+    private async Task<HandlerResult> HandleMovement(Level level)
     {
-        EmitSignal(nameof(InputReceived));
+        if (Input.IsActionJustPressed("toggle_camera_control"))
+        {
+            if (_toMove == ToMove.Player) _toMove = ToMove.Camera;
+            else
+            {
+                _toMove = ToMove.Player;
+                _camera.Offset = Vector2.Zero;
+            }
+        }
+
+        Movement movement;
+        if (GetMovement() is Movement m) movement = m;
+        else return HandlerResult.NextHandler;
+        var (offset, run) = movement;
+        if (_toMove == ToMove.Player) return await MovePlayer(level, offset, run);
+        else return await MoveCamera(offset, run);
     }
 
-    private static readonly (string, Vector2i)[] _axisAlignedActions = {
-        ("move_up", Vector2i.Up), ("move_left", Vector2i.Left), ("move_down", Vector2i.Down), ("move_right", Vector2i.Right)
-    };
-    private static readonly (string, Vector2i)[] _diagonalActions = {
-        ("move_up_left", Vector2i.UpLeft), ("move_down_left", Vector2i.DownLeft),
-        ("move_down_right", Vector2i.DownRight), ("move_up_right", Vector2i.UpRight),
-    };
-    private async Task<InputResult> HandleMovement(Level level)
+    private Movement? GetMovement()
     {
         var vec = Vector2i.Zero;
         var axisAlignedPressed = 0;
@@ -82,37 +115,47 @@ public class Player : Entity
             }
         }
 
-        if (vec == Vector2i.Zero) return InputResult.Continue;
+        if (vec == Vector2i.Zero) return null;
         return (axisAlignedPressed, diagonalPressed) switch
         {
-            (1, 0) or (2, 0) or (0, 1) => await MovementHelper(level, vec, Input.IsActionPressed("move_run")),
-            _ => InputResult.Continue,
+            (1, 0) or (2, 0) or (0, 1) => new Movement(vec, Input.IsActionPressed("move_run")),
+            _ => null,
         };
     }
 
-    private async Task<InputResult> MovementHelper(Level level, Vector2i destination, bool run)
+    private async Task<HandlerResult> MovePlayer(Level level, Vector2i offset, bool run)
     {
-        var moveResult = await MoveByOffset(level, destination, run ? RUN_SPEED : WALK_SPEED);
+        var moveResult = await MoveByOffset(level, offset, run ? RunSpeed : WalkSpeed);
         if (moveResult == MoveResult.Success)
         {
-            level.Map.RevealAround(Coords, VISION_RADIUS);
+            level.Map.RevealAround(Coords, VisionRadius);
             EmitSignal(nameof(Moved), this);
-            return InputResult.EndTurn;
+            return HandlerResult.EndTurn;
         }
         else
         {
-            return InputResult.Continue;
+            return HandlerResult.NextHandler;
         }
     }
 
-    private async Task<InputResult> HandleSpellcast(Level level)
+    private async Task<HandlerResult> MoveCamera(Vector2i offset, bool run)
+    {
+        var pixelOffset = (Vector2)(offset * Globals.TILE_SIZE);
+        var time = 1.0f / (run ? CameraRunSpeed : CameraWalkSpeed);
+        Tween.InterpolateProperty(_camera, "offset", null, _camera.Offset + pixelOffset, time);
+        Tween.Start();
+        await ToSignal(Tween, "tween_completed");
+        return HandlerResult.Restart;
+    }
+
+    private async Task<HandlerResult> HandleSpellcast(Level level)
     {
         if (Input.IsActionJustPressed("light_arrow"))
         {
             var target = level.Map.TileAtGlobalPosition(GetGlobalMousePosition());
-            if (target == Coords) return InputResult.Continue;
+            if (target == Coords) return HandlerResult.NextHandler;
             await Projectiles.SpawnLightArrow().Fire(level, Coords, target);
-            return InputResult.EndTurn;
+            return HandlerResult.EndTurn;
         }
         if (Input.IsActionJustPressed("preview_trajectory"))
         {
@@ -144,12 +187,21 @@ public class Player : Entity
             }
         }
 
-        return InputResult.Continue;
+        return HandlerResult.NextHandler;
+    }
+
+    private readonly record struct Movement(Vector2i offset, bool run);
+
+    private enum ToMove
+    {
+        Player,
+        Camera
     }
 }
 
-public enum InputResult
+public enum HandlerResult
 {
-    Continue,
+    Restart,
+    NextHandler,
     EndTurn,
 }

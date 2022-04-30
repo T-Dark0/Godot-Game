@@ -9,6 +9,11 @@
 [node name="Player" type="Node2D"]
 scale = Vector2( 1.5, 1.5 )
 script = ExtResource( 1 )
+WalkSpeed = 5
+RunSpeed = 12
+CameraWalkSpeed = 8
+CameraRunSpeed = 20
+VisionRadius = 15
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 2 )
