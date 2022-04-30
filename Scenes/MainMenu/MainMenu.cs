@@ -2,7 +2,7 @@ using System;
 using Godot;
 using GodotArray = Godot.Collections.Array;
 
-public class MainMenu : CanvasLayer
+public class MainMenu : Control
 {
 #nullable disable //Initialized in _Ready
     private Sprite _cursor;
@@ -40,6 +40,21 @@ public class MainMenu : CanvasLayer
         level.QueueFree();
 
         root.RemoveChild(level);
+        root.AddChild(this);
+        OnLoad();
+    }
+
+    private async void OnControlsButtonUp()
+    {
+        var root = GetNode("/root");
+        root.RemoveChild(this);
+
+        var controls = Scenes.InstanceControls();
+        root.AddChild(controls);
+        await ToSignal(controls, nameof(Controls.Back));
+        controls.QueueFree();
+
+        root.RemoveChild(controls);
         root.AddChild(this);
         OnLoad();
     }

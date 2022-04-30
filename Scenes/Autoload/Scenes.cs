@@ -6,6 +6,7 @@ public class Scenes : Node2D
     public static Scenes Instance { get; private set; }
 
     [Export] public PackedScene MainMenu { get; private set; }
+    [Export] public PackedScene Controls { get; private set; }
     [Export] public PackedScene Level { get; private set; }
     [Export] public PackedScene DeathScreen { get; private set; }
     [Export] public PackedScene EnemySkull { get; private set; }
@@ -19,6 +20,7 @@ public class Scenes : Node2D
     }
 
     public static MainMenu InstanceMainMenu() => Instance.MainMenu.Instance<MainMenu>();
+    public static Controls InstanceControls() => Instance.Controls.Instance<Controls>();
     public static Level InstanceLevel() => Instance.Level.Instance<Level>();
     public static DeathScreen InstanceDeathScreen() => Instance.DeathScreen.Instance<DeathScreen>();
     public static EnemySkull InstanceEnemySkull() => Instance.EnemySkull.Instance<EnemySkull>();
