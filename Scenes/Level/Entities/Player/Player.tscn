@@ -1,0 +1,42 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scenes/Level/Entities/Player/Player.cs" type="Script" id=1]
+[ext_resource path="res://Assets/Images/Player.png" type="Texture" id=2]
+[ext_resource path="res://Scenes/Level/Entities/Health.cs" type="Script" id=3]
+[ext_resource path="res://Scenes/Level/UI/HealthBar.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Level/Entities/Player/Camera.cs" type="Script" id=5]
+[ext_resource path="res://Assets/Images/TrajectoryReachable.png" type="Texture" id=6]
+[ext_resource path="res://Assets/Images/TrajectoryBlocker.png" type="Texture" id=7]
+[ext_resource path="res://Assets/Images/TrajectoryUnreachable.png" type="Texture" id=8]
+
+[node name="Player" type="Node2D"]
+scale = Vector2( 1.5, 1.5 )
+script = ExtResource( 1 )
+WalkSpeed = 5
+RunSpeed = 12
+CameraWalkSpeed = 8
+CameraRunSpeed = 20
+VisionRadius = 15
+_trajectoryReachable = ExtResource( 6 )
+_trajectoryBlocker = ExtResource( 7 )
+_trajectoryUnreachable = ExtResource( 8 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+
+[node name="Camera" type="Camera2D" parent="."]
+script = ExtResource( 5 )
+MinZoom = 0.1
+MaxZoom = 10.0
+ZoomStep = 1.2
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource( 3 )
+Current = 100
+Max = 100
+
+[node name="Tween" type="Tween" parent="."]
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="HealthBar" parent="." instance=ExtResource( 4 )]

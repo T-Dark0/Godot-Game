@@ -15,7 +15,6 @@ public class Level : Node2D
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
     public List<Enemy> Enemies = new List<Enemy>();
     private bool _isPlayerDead = false;
-    private static DeathScreen _deathScreen = GD.Load<PackedScene>("res://Scenes/Level/DeathScreen.tscn").Instance<DeathScreen>();
 
     private const int SPAWN_INTERVAL = 36;
 
@@ -24,16 +23,6 @@ public class Level : Node2D
         Map = GetNode<Map>("Map");
         Player = GetNode<Player>("Player");
         _turnLabel = GetNode<Label>("TurnLabel/Label");
-    }
-
-    public override void _Notification(int notif)
-    {
-        switch (notif)
-        {
-            case MainLoop.NotificationWmQuitRequest:
-                _deathScreen.QueueFree();
-                break;
-        }
     }
 
     public void Initialize(Random rng)
@@ -48,9 +37,12 @@ public class Level : Node2D
     public async Task PlayGame()
     {
         await GameLoop();
-        AddChild(_deathScreen);
-        await _deathScreen.FadeIn();
-        RemoveChild(_deathScreen);
+
+        var deathScreen = Scenes.InstanceDeathScreen();
+        AddChild(deathScreen);
+        await deathScreen.Display();
+        RemoveChild(deathScreen);
+        deathScreen.QueueFree();
     }
 
     public async Task GameLoop()
@@ -93,9 +85,15 @@ public class Level : Node2D
 
     private void SpawnRandomEnemy()
     {
-        var enemy = global::Enemies.List[Rng.Next(global::Enemies.List.Length)].Instance<Enemy>();
-        var tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
-        if (EntityPositions.ContainsKey(tile)) return; //don't spawn enemies into other things
+        var enemy = Scenes.InstanceEnemySkull(); //TODO: introduce other enemies
+        Vector2i tile;
+        while (true)
+        {
+            tile = Map.GetRandomTileCoord(Rng, Tile.Floor);
+            if (EntityPositions.ContainsKey(tile)) continue; //don't spawn enemies into other things
+            if (Map.IsVisible(tile)) continue; //don't spawn enemies where the player would see it
+            break;
+        }
         AddChild(enemy);
 
         enemy.Initialize(this, tile, Enemies.Count);

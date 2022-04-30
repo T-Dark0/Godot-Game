@@ -1,0 +1,18 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Scenes/Autoload/Scenes.cs" type="Script" id=1]
+[ext_resource path="res://Scenes/MainMenu/MainMenu.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Level/UI/DeathScreen.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Level/Entities/Enemies/EnemySkull.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/Level/Level.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Scenes/Level/Projectiles/CursedBolt.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Scenes/Level/Projectiles/LightArrow.tscn" type="PackedScene" id=7]
+
+[node name="Node" type="Node2D"]
+script = ExtResource( 1 )
+MainMenu = ExtResource( 2 )
+Level = ExtResource( 5 )
+DeathScreen = ExtResource( 3 )
+EnemySkull = ExtResource( 4 )
+LightArrow = ExtResource( 7 )
+CursedBolt = ExtResource( 6 )
