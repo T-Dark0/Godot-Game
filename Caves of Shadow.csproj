@@ -3,6 +3,6 @@
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFramework>net472</TargetFramework>
-    <RootNamespace>Roguelite2</RootNamespace>
+    <RootNamespace>Caves of Shadow</RootNamespace>
   </PropertyGroup>
 </Project>

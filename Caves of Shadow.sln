@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roguelite 2", "Roguelite 2.csproj", "{666BD121-E523-4206-967D-8051C581B706}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caves of Shadow", "Caves of Shadow.csproj", "{666BD121-E523-4206-967D-8051C581B706}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

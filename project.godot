@@ -20,7 +20,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Roguelite 2"
+config/name="Caves of Shadow"
 run/main_scene="res://Scenes/MainMenu/MainMenu.tscn"
 config/icon="res://icon.png"
 
