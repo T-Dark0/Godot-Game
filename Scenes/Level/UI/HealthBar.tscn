@@ -23,6 +23,8 @@ script = ExtResource( 2 )
 BarGreen = ExtResource( 6 )
 BarYellow = ExtResource( 4 )
 BarRed = ExtResource( 5 )
+YellowThreshold = 50.0
+RedThreshold = 25.0
 
 [node name="Bar" type="TextureProgress" parent="."]
 margin_right = 16.0
