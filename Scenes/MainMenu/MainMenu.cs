@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using GodotArray = Godot.Collections.Array;
 
@@ -20,44 +19,14 @@ public class MainMenu : Control
             button.Connect("focus_entered", this, nameof(MoveCursorToButton), new GodotArray(button));
             button.Connect("mouse_entered", this, nameof(MoveCursorToButton), new GodotArray(button));
         }
-        OnLoad();
-    }
 
-    private void OnLoad()
-    {
         _buttons.GetChild<Button>(0).GrabFocus();
+
     }
 
-    private async void OnNewGameButtonUp()
-    {
-        var root = GetNode("/root");
-        root.RemoveChild(this);
+    private void OnNewGameButtonUp() => SceneManager.GotoScene(Scenes.Instance.Level);
 
-        var level = Scenes.InstanceLevel();
-        root.AddChild(level);
-        level.Initialize(new Random());
-        await level.PlayGame();
-        level.QueueFree();
-
-        root.RemoveChild(level);
-        root.AddChild(this);
-        OnLoad();
-    }
-
-    private async void OnControlsButtonUp()
-    {
-        var root = GetNode("/root");
-        root.RemoveChild(this);
-
-        var controls = Scenes.InstanceControls();
-        root.AddChild(controls);
-        await ToSignal(controls, nameof(Controls.Back));
-        controls.QueueFree();
-
-        root.RemoveChild(controls);
-        root.AddChild(this);
-        OnLoad();
-    }
+    private void OnControlsButtonUp() => SceneManager.GotoScene(Scenes.Instance.Controls);
 
     private void OnQuitButtonUp()
     {

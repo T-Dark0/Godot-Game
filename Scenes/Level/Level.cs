@@ -8,10 +8,10 @@ public class Level : Node2D
 {
 #nullable disable //initialized in _Ready or in Initialize
     public Map Map;
-    public Random Rng;
     public Player Player;
     private Label _turnLabel;
 #nullable enable
+    public Random Rng = new Random();
     public Dictionary<Vector2i, Entity> EntityPositions = new Dictionary<Vector2i, Entity>();
     public List<Enemy> Enemies = new List<Enemy>();
     private bool _isPlayerDead = false;
@@ -23,18 +23,15 @@ public class Level : Node2D
         Map = GetNode<Map>("Map");
         Player = GetNode<Player>("Player");
         _turnLabel = GetNode<Label>("TurnLabel/Label");
-    }
 
-    public void Initialize(Random rng)
-    {
-        Rng = rng;
-
-        Map.Initialize(rng);
+        Map.Initialize(Rng);
         SpawnPlayer(Player);
         Map.RevealAround(Player.Coords, Player.VisionRadius);
+
+        PlayGame();
     }
 
-    public async Task PlayGame()
+    public async void PlayGame()
     {
         await GameLoop();
 
@@ -43,6 +40,8 @@ public class Level : Node2D
         await deathScreen.Display();
         RemoveChild(deathScreen);
         deathScreen.QueueFree();
+
+        SceneManager.GotoScene(Scenes.Instance.MainMenu);
     }
 
     public async Task GameLoop()

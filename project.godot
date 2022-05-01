@@ -27,6 +27,7 @@ config/icon="res://icon.png"
 [autoload]
 
 Scenes="*res://Scenes/Autoload/Scenes.tscn"
+MenuManager="*res://Scenes/Autoload/SceneManager.tscn"
 
 [display]
 

@@ -7,9 +7,6 @@ public class Controls : Control
     private Button _backButton;
 #nullable enable
 
-    [Signal]
-    public delegate void Back();
-
     public override void _Ready()
     {
         _cursor = GetNode<Sprite>("Cursor");
@@ -21,8 +18,5 @@ public class Controls : Control
         _cursor.GlobalPosition = new Vector2(x, y);
     }
 
-    public void OnBackButtonUp()
-    {
-        EmitSignal(nameof(Back));
-    }
+    public void OnBackButtonUp() => SceneManager.GotoScene(Scenes.Instance.MainMenu);
 }
